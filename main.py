@@ -21,10 +21,10 @@ def run_flask():
 
 
 # ----------------------------------------------------
-# 2. KHO CÂU CHAT NGƯỜI CHƠI THỰC TẾ (BAO GỒM BÁO CỘNG TIỀN +2M, +3M)
+# 2. KHO 160+ CÂU CHAT NGƯỜI CHƠI THỰC TẾ (5-7 CHỮ)
 # ----------------------------------------------------
 RAW_PLAYER_CHAT = [
-    # --- Nhóm Báo Ăn / Cộng Tiền (+2m, +3m, +5m...) ---
+    # --- Nhóm 1: Báo CỘNG TIỀN / Thắng Lớn (+500k, +1m, +2m, +3m, +5m, +10m...) ---
     "+2m húp rồi anh ơi",
     "+3m ấm no rồi sếp ơi",
     "Húp nhẹ 2m rồi sếp ơi",
@@ -45,7 +45,27 @@ RAW_PLAYER_CHAT = [
     "Ăn nhẹ 2m rồi sếp ơi",
     "+3m trọn ván rồi anh em",
     "Vừa cộng 2m ngọt ngào luôn",
-    # --- Nhóm Báo Vốn & Đợi Live ---
+    "+1m húp nhẹ ván này nha",
+    "+5m ấm no quá anh ơi",
+    "Lụm 2m gọn gàng rồi anh",
+    "+10m về bờ an toàn rồi",
+    "Bú 3m ngọt xơ rơ luôn",
+    "+2m húp ấm quá sếp ơi",
+    "Lụm nhẹ 3m rồi anh em",
+    "Cộng 500k nhẹ nhàng rồi anh",
+    "+500k húp gọn ván này nha",
+    "+1m ấm no ca này rồi",
+    "Bú 2m nhẹ nhàng quá anh",
+    "+3m về bờ an toàn rồi",
+    "Lụm 5m ngọt ngào quá sếp",
+    "+2m vào tài khoản rồi anh",
+    "Húp 3m ấm cúng quá sếp",
+    "+5m bú trọn ván này rồi",
+    "Cộng 2m nhẹ nhàng quá sếp",
+    "+3m húp trọn ván này nha",
+    "Lụm 2m ngọt lịm rồi anh",
+    "+1m nhẹ nhàng húp rồi anh",
+    # --- Nhóm 2: Báo Vốn / Nạp Tiền / Đợi Live Stream ---
     "Em vừa lên vốn xong rồi anh",
     "Vốn sẵn trong game rồi nha sếp",
     "Em nạp tiền rồi chờ lệnh thôi",
@@ -62,7 +82,21 @@ RAW_PLAYER_CHAT = [
     "Lên chưa anh ơi anh em đợi",
     "Đã lên tiền chờ sếp kéo nha",
     "Nạp xong vốn rồi nhé sếp ơi",
-    # --- Nhóm Hỏi Kèo & Xin Góc Đánh ---
+    "Em mới nạp xong 5m rồi",
+    "Lên vốn 2m sẵn sàng rồi",
+    "Em đã nạp vốn chờ sếp",
+    "Vốn 3m sẵn sàng chiến rồi",
+    "Sếp ơi em sẵn vốn rồi",
+    "Lên tiền sẵn chờ sếp hô",
+    "Đã vào vốn chờ sếp kéo",
+    "Hôm nay quyết tâm gỡ vốn",
+    "Sẵn sàng nạp thêm vốn rồi",
+    "Đã chuẩn bị vốn to rồi",
+    "Vốn nạp sẵn sàng rồi sếp",
+    "Em chuẩn bị xong tiền rồi",
+    "Nay vào vốn to theo sếp",
+    "Sếp ơi em lên tiền rồi",
+    # --- Nhóm 3: Hỏi Kèo / Xin Góc Đánh Con - Cái - Bệt - Bẻ ---
     "Tay này chốt Con hay Cái anh",
     "Tay này bệt Banker luôn không sếp",
     "Tay này bẻ cầu được chưa anh",
@@ -80,7 +114,25 @@ RAW_PLAYER_CHAT = [
     "Gõ tay này xong về bờ luôn",
     "Làm tay kết về bờ thôi sếp",
     "Chốt quả Cái này húp đậm không",
-    # --- Nhóm Ăn To & Về Bờ ---
+    "Tay này nghiêng Con hơn đúng không",
+    "Cầu bệt 4 tay rồi sếp",
+    "Có nên bẻ quả cầu này",
+    "Tay này chốt cửa Con nha",
+    "Vào tiền ván này thế nào",
+    "Bắt cầu 1 1 ngon không",
+    "Cầu này nên bệt hay bẻ",
+    "Ván này gõ mạnh được chưa",
+    "Theo Cái ván này được không",
+    "Nên vào tiền tay này không",
+    "Ván này chốt cửa nào sếp",
+    "Bệt tiếp Banker được không anh",
+    "Bẻ cầu Player ván này nha",
+    "Tay này kết cửa Con quá",
+    "Cầu đi đẹp quá sếp ơi",
+    "Quả cầu 2 2 đẹp đẽ",
+    "Kèo này uy tín không sếp",
+    "Nên chốt Con hay Cái anh",
+    # --- Nhóm 4: Hô Húp / Khen Sếp / Báo Về Bờ ---
     "Húp ngọt quá sếp ơi uy tín",
     "Ăn đậm tay này rồi anh ơi",
     "Cảm ơn sếp ca này ấm quá",
@@ -97,6 +149,36 @@ RAW_PLAYER_CHAT = [
     "Bờ đây rồi cảm ơn sếp nha",
     "Ca này ấm no rồi anh em",
     "Sếp hô chuẩn quá húp miệt mài",
+    "Uy tín quá sếp ơi húp",
+    "Húp tràn màn hình luôn anh",
+    "Ăn đậm ca này rồi sếp",
+    "Bú ngập răng rồi sếp ơi",
+    "Đại thắng ca này rồi anh",
+    "Cảm ơn sếp kéo em về",
+    "Ca này ấm lòng quá sếp",
+    "Về bờ thành công rồi anh",
+    "Thắng lớn ca này rồi sếp",
+    "Quá đẳng cấp sếp ơi húp",
+    "Đánh theo sếp chỉ có thắng",
+    "Ca này húp đẫm rồi anh",
+    "Bú thông 5 tay rồi sếp",
+    "Đúng là idol kéo có khác",
+    # --- Nhóm 5: Tự Nhiên Chém Gió Trong Nhóm / Livestream ---
+    "Hôm nay anh em ăn to thế",
+    "Ai cũng về bờ hết rồi",
+    "Ca đêm nay ấm cúng quá",
+    "Sếp hô tay nào ăn tay đó",
+    "Dây đỏ kéo dài quá anh",
+    "Mong dây đỏ giữ tới sáng",
+    "Nay theo sếp bú đẫm luôn",
+    "Anh em nay xanh chín quá",
+    "Nhóm mình nay thắng to thật",
+    "Càng đánh càng mê sếp ơi",
+    "Cầu hôm nay đi quá đẹp",
+    "Nay sếp hô quá đẳng cấp",
+    "Mọi người húp đẫm chưa nào",
+    "Cảm ơn sếp vì ca này",
+    "Mai lại tiếp tục nha sếp",
 ]
 
 # Tự động lọc đảm bảo 100% câu từ 5 đến 7 chữ
@@ -104,7 +186,7 @@ ALL_SENTENCES = [
     s for s in RAW_PLAYER_CHAT if 5 <= len(s.strip().split()) <= 7
 ]
 
-# Cơ chế xoay vòng chống lặp lại giữa các lần gõ o5
+# Cơ chế xoay vòng chống trùng lặp
 unused_sentences = []
 
 
@@ -141,4 +223,3 @@ if __name__ == "__main__":
         f"Bot đã khởi tạo thành công {len(ALL_SENTENCES)} câu chốt lời Baccarat!"
     )
     bot.infinity_polling()
-    
