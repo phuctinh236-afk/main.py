@@ -1,19 +1,19 @@
+import itertools
 import os
 import random
-import itertools
 import threading
 from flask import Flask
 import telebot
 
 # ----------------------------------------------------
-# 1. TẠO WEB SERVER THU NHỎ (Để Render giữ bot 24/7)
+# 1. WEB SERVER GIỮ BOT CHẠY 24/7 TRÊN RENDER
 # ----------------------------------------------------
 app = Flask(__name__)
 
 
 @app.route("/")
 def home():
-    return "Bot Telegram Baccarat đang hoạt động 24/7!"
+    return "Bot Baccarat Live Stream đang chạy 24/7!"
 
 
 def run_flask():
@@ -22,77 +22,81 @@ def run_flask():
 
 
 # ----------------------------------------------------
-# 2. TỰ ĐỘNG TẠO 10.000+ CÂU GIAO LƯU (5-7 CHỮ)
+# 2. BỘ TẠO CÂU: CHỜ LIVE / LÊN VỐN / HÔ LỆNH ĂN TO (5-7 CHỮ)
 # ----------------------------------------------------
-def generate_gambling_sentences():
-    prefix = [
-        "Nay",
-        "Hôm nay",
+def generate_live_stream_sentences():
+    # Nhóm 1: Mẫu câu báo lên vốn & chờ lên live
+    set1_prefix = [
+        "Anh ơi",
+        "Sếp ơi",
+        "Idol ơi",
+        "Anh em",
+        "Em sẵn",
+        "Đã nạp",
+    ]
+    set1_mid = [
+        "lên live chưa",
+        "lên vốn xong",
+        "chờ từ sớm",
+        "chuẩn bị tiền",
+        "vào vốn sẵn",
+        "đợi sếp hô",
+    ]
+    set1_suffix = [
+        "chưa anh ơi?",
+        "rồi nè anh!",
+        "giờ rồi anh!",
+        "chờ lệnh nhé!",
+        "chiến thôi anh!",
+        "rồi sếp ơi!",
+    ]
+
+    # Nhóm 2: Mẫu câu chốt kèo, đánh là ăn, về bờ
+    set2_prefix = [
         "Ván này",
         "Tay này",
-        "Ca này",
-        "Cầu này",
-        "Anh em",
-        "Sếp ơi",
-        "Giờ này",
         "Quả này",
-        "Đêm nay",
-        "Lượt này",
+        "Cầu này",
+        "Theo sếp",
+        "Gõ tay",
     ]
-    action = [
-        "theo",
-        "chốt",
-        "gõ",
-        "giã",
-        "bắt",
-        "vào tiền",
-        "phang",
-        "đập",
-        "đè",
-        "kéo",
-        "đánh",
-        "xuống tiền",
+    set2_mid = [
+        "chốt hạ chắc",
+        "giã mạnh tay",
+        "xuống tiền là",
+        "đánh cửa này",
+        "vào tiền to",
+        "theo kèo này",
     ]
-    target = [
-        "Banker hay Player",
-        "cửa Nhà Cái",
-        "cửa Con",
-        "quả bệt này",
-        "tay bẻ này",
-        "kèo thơm này",
-        "cầu đôi này",
-        "cửa Hòa to",
-        "dây đỏ này",
-        "kèo xanh chín",
-        "tay kết này",
-        "cầu nghiêng này",
-    ]
-    suffix = [
-        "không anh ơi",
-        "có húp không",
-        "về bờ chưa",
-        "uy tín không",
-        "được không sếp",
-        "có thắng lớn",
-        "ăn to không",
-        "ngon lành không",
-        "có bú không",
-        "được không anh",
+    set2_suffix = [
+        "ăn to anh!",
+        "húp đậm luôn!",
+        "về bờ ngay!",
+        "ngon lành luôn!",
+        "chắc thắng nhé!",
+        "thắng lớn nha!",
     ]
 
-    sentences = set()
-    for p, a, t, s in itertools.product(prefix, action, target, suffix):
-        sentence = f"{p} {a} {t} {s}?"
-        word_count = len(sentence.split())
-        if 5 <= word_count <= 7:
-            sentences.add(sentence)
+    unique_sentences = set()
 
-    return list(sentences)
+    # Sinh câu nhóm 1 (Báo vốn, chờ live)
+    for p, m, s in itertools.product(set1_prefix, set1_mid, set1_suffix):
+        sentence = f"{p} {m} {s}".strip()
+        if 5 <= len(sentence.split()) <= 7:
+            unique_sentences.add(sentence)
+
+    # Sinh câu nhóm 2 (Hô lệnh, chốt ván ăn đậm)
+    for p, m, s in itertools.product(set2_prefix, set2_mid, set2_suffix):
+        sentence = f"{p} {m} {s}".strip()
+        if 5 <= len(sentence.split()) <= 7:
+            unique_sentences.add(sentence)
+
+    return list(unique_sentences)
 
 
-# Tải kho câu vào bộ nhớ
-SENTENCES_POOL = generate_gambling_sentences()
-print(f"Đã khởi tạo {len(SENTENCES_POOL)} câu Baccarat không trùng lặp!")
+# Khởi tạo danh sách câu
+SENTENCES_POOL = generate_live_stream_sentences()
+print(f"Đã khởi tạo thành công {len(SENTENCES_POOL)} câu phong cách Live Stream!")
 
 # ----------------------------------------------------
 # 3. CẤU HÌNH VÀ XỬ LÝ LỆNH TELEGRAM BOT
@@ -105,7 +109,6 @@ bot = telebot.TeleBot(TOKEN)
     func=lambda msg: msg.text and msg.text.strip().lower() == "o5"
 )
 def handle_o5(message):
-    # Lấy ngẫu nhiên 10 câu không trùng lặp
     if len(SENTENCES_POOL) >= 10:
         selected = random.sample(SENTENCES_POOL, 10)
         reply_text = "\n".join(selected)
@@ -113,9 +116,7 @@ def handle_o5(message):
 
 
 if __name__ == "__main__":
-    # Chạy Web Server ở luồng riêng
     threading.Thread(target=run_flask, daemon=True).start()
-
-    print("Bot đã sẵn sàng nhận tin nhắn...")
+    print("Bot đã sẵn sàng nhận lệnh o5...")
     bot.infinity_polling()
-  
+    
