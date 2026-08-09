@@ -2,48 +2,13 @@ import html
 import os
 import random
 import threading
-from flask import Flask
+from flask import Flask, render_template_string
 import telebot
-from telebot.types import InlineKeyboardButton, InlineKeyboardMarkup
+from telebot.types import InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
 
 # ----------------------------------------------------
-# 1. WEB SERVER GIỮ BOT CHẠY 24/7 TRÊN RENDER
+# 1. KHO CÂU CHAT BACCARAT (5-7 CHỮ)
 # ----------------------------------------------------
-app = Flask(__name__)
-
-
-@app.route("/")
-def home():
-    return "Mini Game Baccarat Tool Bot đang chạy 24/7!"
-
-
-def run_flask():
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
-
-
-# ----------------------------------------------------
-# 2. BOT TELEGRAM & DỮ LIỆU MINI GAME
-# ----------------------------------------------------
-TOKEN = os.environ.get("BOT_TOKEN")
-bot = telebot.TeleBot(TOKEN)
-
-# Lưu trữ dữ liệu người chơi trong bộ nhớ (Xu, Thắng, Thua)
-user_data = {}
-
-
-def get_user(user_id, name):
-    if user_id not in user_data:
-        user_data[user_id] = {
-            "name": name,
-            "xu": 10000,  # Tặng 10,000 Xu khởi tạo
-            "wins": 0,
-            "losses": 0,
-        }
-    return user_data[user_id]
-
-
-# Kho 100+ câu chat người chơi (5-7 chữ)
 RAW_PLAYER_CHAT = [
     "+2m húp rồi anh ơi",
     "+3m ấm no rồi sếp ơi",
@@ -79,239 +44,339 @@ ALL_SENTENCES = [
     s for s in RAW_PLAYER_CHAT if 5 <= len(s.strip().split()) <= 7
 ]
 
+# ----------------------------------------------------
+# 2. FLASK WEBAPP - GIAO DIỆN SẢNH TERMINAL ĐEN
+# ----------------------------------------------------
+app = Flask(__name__)
+
+HTML_TEMPLATE = """
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TX68 TERMINAL LOBBY</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            background-color: #0c0d0e;
+            color: #00ff66;
+            font-family: 'Consolas', 'Courier New', monospace;
+            padding: 10px;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .header {
+            font-size: 10px;
+            white-space: pre;
+            color: #00e5ff;
+            text-align: center;
+            line-height: 1.1;
+            margin-bottom: 8px;
+            user-select: none;
+        }
+        .status-bar {
+            background: #141619;
+            border: 1px solid #22252a;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            color: #888;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .status-bar span { color: #00ff66; font-weight: bold; }
+        
+        /* KHUNG TERMINAL LOG CHÁT */
+        .terminal-window {
+            flex: 1;
+            background: #050505;
+            border: 1px solid #00ff66;
+            border-radius: 4px;
+            padding: 10px;
+            overflow-y: auto;
+            font-size: 12px;
+            line-height: 1.5;
+            box-shadow: inset 0 0 10px rgba(0, 255, 102, 0.1);
+        }
+        .log-line {
+            margin-bottom: 4px;
+            word-break: break-word;
+        }
+        .log-sys { color: #888; }
+        .log-user { color: #00e5ff; }
+        .log-bot { color: #00ff66; }
+        .log-chat {
+            background: #111;
+            border-left: 3px solid #00ff66;
+            padding: 4px 8px;
+            margin: 4px 0;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 2px;
+        }
+        .log-chat:active {
+            background: #00ff66;
+            color: #000;
+        }
+
+        /* KHUNG NHẬP LỆNH CHÁT THỦ CÔNG */
+        .input-box {
+            display: flex;
+            gap: 6px;
+            margin-top: 8px;
+            background: #141619;
+            padding: 6px;
+            border: 1px solid #333;
+            border-radius: 4px;
+        }
+        .prompt-symbol {
+            color: #00e5ff;
+            font-weight: bold;
+            line-height: 32px;
+            padding-left: 4px;
+        }
+        input[type="text"] {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-family: inherit;
+            font-size: 13px;
+            outline: none;
+        }
+        .btn-send {
+            background: #00ff66;
+            color: #000;
+            border: none;
+            padding: 0 14px;
+            font-family: inherit;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+
+        /* NÚT TƯƠNG TÁC NHANH */
+        .quick-actions {
+            display: flex;
+            gap: 6px;
+            margin-top: 8px;
+        }
+        .btn-action {
+            flex: 1;
+            background: #181a1f;
+            color: #00e5ff;
+            border: 1px solid #00e5ff;
+            padding: 8px 0;
+            font-family: inherit;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 3px;
+            text-align: center;
+        }
+        .btn-action:active {
+            background: #00e5ff;
+            color: #000;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #00ff66;
+            color: #000;
+            padding: 6px 16px;
+            font-weight: bold;
+            border-radius: 20px;
+            display: none;
+            box-shadow: 0 0 10px #00ff66;
+            z-index: 999;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+   ___ ____  _  _    ____ ____ _  _ ____ 
+  |_  |__  || || |  |  __|  __| || |  __|
+  |  _|  | || || |_ |  __|  __| || |  __|
+  |___|  |_||__   _||____|____|____|____|
+    </div>
+
+    <div class="status-bar">
+        <div>STATUS: <span>ACTIVE</span></div>
+        <div>SERVER: <span>RENDER_NODE_01</span></div>
+    </div>
+
+    <!-- MÀN HÌNH TERMINAL CHÁT -->
+    <div class="terminal-window" id="terminal">
+        <div class="log-line log-sys">20:21:30 INCOMING HTTP REQUEST DETECTED ...</div>
+        <div class="log-line log-sys">20:21:33 SERVICE WAKING UP ...</div>
+        <div class="log-line log-bot">[SYSTEM] Sảnh Terminal TX68 đã sẵn sàng!</div>
+        <div class="log-line log-bot">[SYSTEM] Bạn có thể gõ nội dung hoặc dùng các nút lệnh bên dưới.</div>
+        <div class="log-line log-sys">--------------------------------------------------</div>
+    </div>
+
+    <!-- NÚT ĐIỀU KHIỂN NHANH -->
+    <div class="quick-actions">
+        <button class="btn-action" onclick="fetch10O5()">💬 10 CÂU O5</button>
+        <button class="btn-action" onclick="playGame('PLAYER')">🔵 CƯỢC CON</button>
+        <button class="btn-action" onclick="playGame('BANKER')">🔴 CƯỢC CÁI</button>
+        <button class="btn-action" style="border-color:#ff5555; color:#ff5555;" onclick="clearTerminal()">🧹 XÓA</button>
+    </div>
+
+    <!-- KHUNG CHAT / NHẬP LỆNH -->
+    <div class="input-box">
+        <span class="prompt-symbol">root@tx68:~#</span>
+        <input type="text" id="chat-input" placeholder="Gõ tin nhắn hoặc lệnh..." onkeydown="handleKeyPress(event)">
+        <button class="btn-send" onclick="sendChatMessage()">GỬI</button>
+    </div>
+
+    <div class="toast" id="toast">ĐÃ COPY!</div>
+
+    <script>
+        const Telegram = window.Telegram.WebApp;
+        Telegram.expand();
+
+        const rawChat = {{ raw_chat | tojson }};
+        const terminal = document.getElementById('terminal');
+
+        function scrollToBottom() {
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        function showToast(text) {
+            const toast = document.getElementById('toast');
+            toast.innerText = text;
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 1200);
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('COPIED: "' + text + '"');
+            });
+        }
+
+        function getTime() {
+            const d = new Date();
+            return d.toTimeString().split(' ')[0];
+        }
+
+        function appendLog(text, type = 'log-bot') {
+            const div = document.createElement('div');
+            div.className = 'log-line ' + type;
+            div.innerText = `[${getTime()}] ${text}`;
+            terminal.appendChild(div);
+            scrollToBottom();
+        }
+
+        function appendChatBox(text) {
+            const div = document.createElement('div');
+            div.className = 'log-chat';
+            div.innerHTML = `<span>💬 ${text}</span> <span style="float:right; opacity:0.6; font-size:10px;">[NHẤP ĐỂ COPY]</span>`;
+            div.onclick = () => copyToClipboard(text);
+            terminal.appendChild(div);
+            scrollToBottom();
+        }
+
+        function sendChatMessage() {
+            const input = document.getElementById('chat-input');
+            const val = input.value.trim();
+            if (!val) return;
+
+            appendLog(`USER: ${val}`, 'log-user');
+            input.value = '';
+
+            // Tự động phản hồi kiểu Terminal
+            setTimeout(() => {
+                if (val.toLowerCase() === 'o5') {
+                    fetch10O5();
+                } else {
+                    appendChatBox(val);
+                }
+            }, 300);
+        }
+
+        function handleKeyPress(e) {
+            if (e.key === 'Enter') {
+                sendChatMessage();
+            }
+        }
+
+        function fetch10O5() {
+            appendLog('EXECUTE: Get 10 Baccarat Chat Lines...', 'log-sys');
+            let shuffled = [...rawChat].sort(() => 0.5 - Math.random()).slice(0, 10);
+            shuffled.forEach(s => appendChatBox(s));
+        }
+
+        function playGame(choice) {
+            appendLog(`BET: ${choice}`, 'log-user');
+            const p = Math.floor(Math.random() * 10);
+            const b = Math.floor(Math.random() * 10);
+            const win = p > b ? 'PLAYER' : (b > p ? 'BANKER' : 'TIE');
+
+            setTimeout(() => {
+                appendLog(`RESULT: 🔵 Player: ${p} | 🔴 Banker: ${b}`, 'log-sys');
+                if (win === choice) {
+                    appendLog(`>> SUCCESS! Bạn đã đoán đúng cửa ${choice}!`, 'log-bot');
+                } else if (win === 'TIE') {
+                    appendLog(`>> RESULT: Hoà nút!`, 'log-sys');
+                } else {
+                    appendLog(`>> FAIL! Cửa thắng là ${win}`, 'log-sys');
+                }
+            }, 400);
+        }
+
+        function clearTerminal() {
+            terminal.innerHTML = '<div class="log-line log-sys">[SYSTEM] Màn hình đã được làm sạch.</div>';
+        }
+    </script>
+</body>
+</html>
+"""
+
+@app.route("/")
+def index():
+    return render_template_string(HTML_TEMPLATE, raw_chat=ALL_SENTENCES)
+
+def run_flask():
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
 
 # ----------------------------------------------------
-# 3. GIAO DIỆN MENU HACKER / TERMINAL (LIKE IMAGE)
+# 3. TELEGRAM BOT HANDLER
 # ----------------------------------------------------
-def create_main_menu(user_info):
-    text = (
-        f"<b>[ - BACCARAT TOOL MINI GAME - ]</b>\n"
-        f"<code>═════════════════════════════════════</code>\n"
-        f"<code>~{{ }}~ Status: ONLINE | Mode: Interactive</code>\n"
-        f"<code>[NQ-TOOL] | User: {user_info['name'][:12]} | Xu: {user_info['xu']:,}</code>\n"
-        f"<code>─────────────────────────────────────</code>\n"
-        f"<code>[1] 🎲 Chơi Baccarat (Đặt Cược)</code>\n"
-        f"<code>[2] 💬 Lấy 10 Câu Chat (Copy 1-Chạm)</code>\n"
-        f"<code>[3] 🎁 Điểm Danh Nhận +5,000 Xu</code>\n"
-        f"<code>[4] 👤 Xem Hồ Sơ & Lịch Sử Thắng/Thua</code>\n"
-        f"<code>─────────────────────────────────────</code>\n"
-        f"<code>~{{ }}~ Nhấp nút bên dưới hoặc gõ số [1-4]</code>\n"
-        f"<code>═════════════════════════════════════</code>"
-    )
+TOKEN = os.environ.get("BOT_TOKEN")
+RENDER_URL = os.environ.get("RENDER_EXTERNAL_URL", "https://your-app-name.onrender.com")
 
-    markup = InlineKeyboardMarkup()
-    markup.row(
-        InlineKeyboardButton("🎲 [1] Chơi Game", callback_data="btn_game"),
-        InlineKeyboardButton("💬 [2] Copy Chat", callback_data="btn_chat"),
-    )
-    markup.row(
-        InlineKeyboardButton("🎁 [3] Điểm Danh", callback_data="btn_daily"),
-        InlineKeyboardButton("👤 [4] Hồ Sơ", callback_data="btn_profile"),
-    )
-    return text, markup
+bot = telebot.TeleBot(TOKEN)
 
-
-# ----------------------------------------------------
-# 4. HANDLERS LỆNH & TIN NHẮN
-# ----------------------------------------------------
 @bot.message_handler(commands=["start", "menu"])
-@bot.message_handler(
-    func=lambda msg: msg.text and msg.text.strip().lower() in ["menu", "o5"]
-)
-def show_menu(message):
-    user = get_user(message.from_user.id, message.from_user.first_name)
-
-    # Nếu người dùng gõ trực tiếp O5 -> Trả về danh sách copy ngay lập tức
-    if message.text and message.text.strip().lower() == "o5":
-        send_copy_sentences(message.chat.id)
-        return
-
-    text, markup = create_main_menu(user)
-    bot.send_message(message.chat.id, text, parse_mode="HTML", reply_markup=markup)
-
-
-@bot.message_handler(func=lambda msg: msg.text in ["1", "2", "3", "4"])
-def handle_number_input(message):
-    user = get_user(message.from_user.id, message.from_user.first_name)
-    choice = message.text.strip()
-
-    if choice == "1":
-        send_baccarat_game(message.chat.id, user)
-    elif choice == "2":
-        send_copy_sentences(message.chat.id)
-    elif choice == "3":
-        claim_daily_xu(message.chat.id, user)
-    elif choice == "4":
-        send_profile_info(message.chat.id, user)
-
-
-# ----------------------------------------------------
-# 5. XỬ LÝ SỰ KIỆN NÚT BẤM (CALLBACK)
-# ----------------------------------------------------
-@bot.callback_query_handler(func=lambda call: True)
-def handle_callback(call):
-    user = get_user(call.from_user.id, call.from_user.first_name)
-
-    if call.data == "btn_game":
-        send_baccarat_game(call.message.chat.id, user)
-    elif call.data == "btn_chat":
-        send_copy_sentences(call.message.chat.id)
-    elif call.data == "btn_daily":
-        claim_daily_xu(call.message.chat.id, user)
-    elif call.data == "btn_profile":
-        send_profile_info(call.message.chat.id, user)
-    elif call.data in ["bet_player", "bet_banker"]:
-        play_baccarat_round(call.message.chat.id, user, call.data)
-    elif call.data == "btn_back_menu":
-        text, markup = create_main_menu(user)
-        bot.send_message(
-            call.message.chat.id, text, parse_mode="HTML", reply_markup=markup
-        )
-
-    bot.answer_callback_query(call.id)
-
-
-# ----------------------------------------------------
-# 6. CÁC HÀM TÍNH NĂNG CON
-# ----------------------------------------------------
-def send_copy_sentences(chat_id):
-    selected = random.sample(ALL_SENTENCES, min(10, len(ALL_SENTENCES)))
-    lines = [
-        "<b>[ - BACCARAT CHAT VIP - ]</b>",
-        "<code>═════════════════════════════════════</code>",
-        "<code>~{ }~ Chạm nhẹ vào câu để COPY tự động</code>",
-        "<code>─────────────────────────────────────</code>",
-    ]
-    for idx, s in enumerate(selected, 1):
-        lines.append(f"[{idx:02d}] <code>{html.escape(s)}</code>")
-
-    lines.append("<code>─────────────────────────────────────</code>")
-    lines.append("<code>~{ }~ Gõ O5 hoặc 2 để lấy danh sách mới</code>")
-    lines.append("<code>═════════════════════════════════════</code>")
-
+@bot.message_handler(func=lambda msg: True)
+def handle_all_messages(message):
     markup = InlineKeyboardMarkup()
-    markup.add(
-        InlineKeyboardButton("🔙 Về Menu Chính", callback_data="btn_back_menu")
+    web_app_info = WebAppInfo(url=RENDER_URL)
+    markup.add(InlineKeyboardButton("🖥️ MỞ SẢNH TERMINAL CHAT", web_app=web_app_info))
+
+    msg_text = (
+        "<b>[ - TX68 TERMINAL LOBBY - ]</b>\n"
+        "<code>═════════════════════════════════════</code>\n"
+        "<code>Bấm nút bên dưới để mở Sảnh Chat Terminal</code>\n"
+        "<code>màn hình đen, gõ chat & chơi game trực tiếp!</code>\n"
+        "<code>═════════════════════════════════════</code>"
     )
-    bot.send_message(
-        chat_id, "\n".join(lines), parse_mode="HTML", reply_markup=markup
-    )
+    bot.reply_to(message, msg_text, parse_mode="HTML", reply_markup=markup)
 
-
-def send_baccarat_game(chat_id, user):
-    text = (
-        f"<b>[ - MINI GAME BACCARAT - ]</b>\n"
-        f"<code>═════════════════════════════════════</code>\n"
-        f"<code>[NQ-TOOL] | Số Xu hiện có: {user['xu']:,} Xu</code>\n"
-        f"<code>Mức cược mặc định: 1,000 Xu / Tay</code>\n"
-        f"<code>─────────────────────────────────────</code>\n"
-        f"<code>Vui lòng chọn cửa đặt cược bên dưới:</code>"
-    )
-    markup = InlineKeyboardMarkup()
-    markup.row(
-        InlineKeyboardButton("🔵 Player (Con)", callback_data="bet_player"),
-        InlineKeyboardButton("🔴 Banker (Cái)", callback_data="bet_banker"),
-    )
-    markup.add(
-        InlineKeyboardButton("🔙 Về Menu Chính", callback_data="btn_back_menu")
-    )
-    bot.send_message(chat_id, text, parse_mode="HTML", reply_markup=markup)
-
-
-def play_baccarat_round(chat_id, user, choice):
-    bet_amount = 1000
-    if user["xu"] < bet_amount:
-        bot.send_message(
-            chat_id,
-            "<code>[NQ-TOOL] | Lỗi: Không đủ Xu! Vui lòng Điểm danh [3] để nhận thêm Xu.</code>",
-            parse_mode="HTML",
-        )
-        return
-
-    player_score = random.randint(0, 9)
-    banker_score = random.randint(0, 9)
-
-    winner = (
-        "bet_player"
-        if player_score > banker_score
-        else ("bet_banker" if banker_score > player_score else "tie")
-    )
-
-    if winner == choice:
-        user["xu"] += bet_amount
-        user["wins"] += 1
-        status = f"THẮNG! +{bet_amount:,} Xu"
-    elif winner == "tie":
-        status = "HÒA! Hoàn tiền cược"
-    else:
-        user["xu"] -= bet_amount
-        user["losses"] += 1
-        status = f"THUA! -{bet_amount:,} Xu"
-
-    chosen_name = "🔵 Player (Con)" if choice == "bet_player" else "🔴 Banker (Cái)"
-
-    res_text = (
-        f"<b>[ - BACCARAT RESULT - ]</b>\n"
-        f"<code>═════════════════════════════════════</code>\n"
-        f"<code>[NQ-TOOL] | Analyzing card... SUCCESS!</code>\n"
-        f"<code>Cửa bạn chọn: {chosen_name}</code>\n"
-        f"<code>─────────────────────────────────────</code>\n"
-        f"<code>🔵 Player: {player_score} Nút  |  🔴 Banker: {banker_score} Nút</code>\n"
-        f"<code>─────────────────────────────────────</code>\n"
-        f"<code>Kết quả: {status}</code>\n"
-        f"<code>Số Xu còn lại: {user['xu']:,} Xu</code>\n"
-        f"<code>═════════════════════════════════════</code>"
-    )
-
-    markup = InlineKeyboardMarkup()
-    markup.row(
-        InlineKeyboardButton("🎲 Đánh Ván Mới", callback_data="btn_game"),
-        InlineKeyboardButton("🔙 Menu Chính", callback_data="btn_back_menu"),
-    )
-    bot.send_message(chat_id, res_text, parse_mode="HTML", reply_markup=markup)
-
-
-def claim_daily_xu(chat_id, user):
-    user["xu"] += 5000
-    msg = (
-        f"<b>[ - ĐIỂM DANH THÀNH CÔNG - ]</b>\n"
-        f"<code>[NQ-TOOL] | +5,000 Xu đã được thêm vào tài khoản!</code>\n"
-        f"<code>Tổng Xu hiện tại: {user['xu']:,} Xu</code>"
-    )
-    markup = InlineKeyboardMarkup()
-    markup.add(
-        InlineKeyboardButton("🔙 Về Menu Chính", callback_data="btn_back_menu")
-    )
-    bot.send_message(chat_id, msg, parse_mode="HTML", reply_markup=markup)
-
-
-def send_profile_info(chat_id, user):
-    total_games = user["wins"] + user["losses"]
-    win_rate = (
-        (user["wins"] / total_games * 100) if total_games > 0 else 0.0
-    )
-
-    msg = (
-        f"<b>[ - HỒ SƠ NGƯỜI CHƠI - ]</b>\n"
-        f"<code>═════════════════════════════════════</code>\n"
-        f"<code>Tên: {user['name']}</code>\n"
-        f"<code>Số Xu: {user['xu']:,} Xu</code>\n"
-        f"<code>Thắng: {user['wins']} ván  |  Thua: {user['losses']} ván</code>\n"
-        f"<code>Tỷ lệ thắng: {win_rate:.1f}%</code>\n"
-        f"<code>═════════════════════════════════════</code>"
-    )
-    markup = InlineKeyboardMarkup()
-    markup.add(
-        InlineKeyboardButton("🔙 Về Menu Chính", callback_data="btn_back_menu")
-    )
-    bot.send_message(chat_id, msg, parse_mode="HTML", reply_markup=markup)
-
-
-# ----------------------------------------------------
-# 7. CHẠY BOT DÒNG LỆNH
-# ----------------------------------------------------
 if __name__ == "__main__":
     threading.Thread(target=run_flask, daemon=True).start()
-    print("Bot Mini Game & Tool đã sẵn sàng!")
+    print("Sảnh Terminal đang chạy...")
     bot.infinity_polling()
-        
+    
