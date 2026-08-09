@@ -131,21 +131,23 @@ HTML_TEMPLATE = """
         }
         .status-bar span { color: #00ff66; font-weight: bold; }
         
-        /* CẤU HÌNH MÀU SẮC YÊU CẦU */
+        /* ADMIN PANEL MÀU XANH LÁ */
         .admin-panel-prefix {
-            color: #00ff66 !important; /* MÀU XANH LÁ */
+            color: #00ff66 !important;
             font-weight: bold;
+            white-space: nowrap;
         }
 
-        /* CHỮ 7 MÀU LIÊN TỤC CHO TOOL VIP */
+        /* TOOL VIP 7 MÀU CHUYỂN ĐỘNG LIÊN TỤC */
         .tool-vip-rainbow {
             background: linear-gradient(90deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #8b00ff, #ff0000);
             background-size: 200% auto;
             color: transparent;
             -webkit-background-clip: text;
             background-clip: text;
-            animation: rainbow 2s linear infinite;
+            animation: rainbow 1.5s linear infinite;
             font-weight: bold;
+            display: inline-block;
         }
 
         @keyframes rainbow {
@@ -164,7 +166,6 @@ HTML_TEMPLATE = """
             font-size: 12px;
             line-height: 1.5;
             box-shadow: inset 0 0 10px rgba(0, 255, 102, 0.1);
-            cursor: text;
             display: flex;
             flex-direction: column;
         }
@@ -179,6 +180,7 @@ HTML_TEMPLATE = """
             word-break: break-word;
         }
 
+        /* KHUNG CHAT 1-CHẠM THAY TOÀN BỘ 💬 BẰNG TOOL VIP 7 MÀU */
         .log-chat {
             background: #111;
             border-left: 3px solid #00ff66;
@@ -196,13 +198,14 @@ HTML_TEMPLATE = """
             color: #000;
         }
 
-        /* DÒNG CON TRỎ CHAT TRỰC TIẾP TRONG TERMINAL */
+        /* FORM NHẬP CHAT CHUẨN ĐIỆN THOẠI */
         .inline-input-line {
             display: flex;
             align-items: center;
             gap: 6px;
             margin-top: 6px;
-            padding-bottom: 8px;
+            padding-bottom: 4px;
+            width: 100%;
         }
 
         .inline-input-line input {
@@ -214,6 +217,7 @@ HTML_TEMPLATE = """
             font-size: 12px;
             outline: none;
             caret-color: #00ff66;
+            width: 100%;
         }
 
         .quick-actions {
@@ -226,7 +230,7 @@ HTML_TEMPLATE = """
             background: #181a1f;
             color: #00e5ff;
             border: 1px solid #00e5ff;
-            padding: 10px 0;
+            padding: 12px 0;
             font-family: inherit;
             font-size: 12px;
             font-weight: bold;
@@ -234,6 +238,7 @@ HTML_TEMPLATE = """
             border-radius: 4px;
             text-align: center;
             transition: all 0.2s;
+            -webkit-tap-highlight-color: transparent;
         }
         .btn-action:active {
             background: #00e5ff;
@@ -287,22 +292,24 @@ HTML_TEMPLATE = """
         </div>
 
         <!-- MÀN HÌNH TERMINAL CHÁT -->
-        <div class="terminal-window" id="terminal" onclick="focusInput()">
+        <div class="terminal-window" id="terminal">
             <div id="logs-container">
-                <div class="log-line"><span class="tool-vip-rainbow">TOOL VIP:</span> <span style="color:#00e5ff;">Chào sếp! Sảnh Terminal AI Baccarat đã kích hoạt. Sếp cần hướng dẫn sử dụng hay soi cầu cứ nhắn nhé!</span></div>
-                <div class="log-line" style="color:#555;">--------------------------------------------------</div>
+                <div class="log-line"><span class="tool-vip-rainbow">TOOL VIP:</span> <span style="color:#00e5ff;">Chào sếp! Sảnh Terminal AI Baccarat đã kích hoạt. Sếp gõ câu hỏi hoặc ấn nút [10 CÂU O5] nhé!</span></div>
+                <div class="log-line" style="color:#333;">--------------------------------------------------</div>
             </div>
 
-            <!-- DÒNG NHẬP CHAT MÀU XANH HÌNH ADMIN PANEL -->
-            <div class="inline-input-line">
+            <!-- FORM GỬI CHAT TƯƠNG THÍCH MỌI BÀN PHÍM ĐIỆN THOẠI -->
+            <form class="inline-input-line" onsubmit="handleFormSubmit(event)">
                 <span class="admin-panel-prefix">admin panel:</span>
-                <input type="text" id="chat-input" placeholder="Nhập câu hỏi hoặc 'o5'..." onkeydown="handleKeyPress(event)" autocomplete="off">
-            </div>
+                <input type="text" id="chat-input" placeholder="Gõ câu hỏi/lệnh rồi bấm Enter..." autocomplete="off">
+                <button type="submit" style="display: none;"></button>
+            </form>
         </div>
 
+        <!-- NÚT ĐIỀU KHIỂN NHANH -->
         <div class="quick-actions">
-            <button class="btn-action" id="btn-o5" onclick="fetch10O5WithDelay()">💬 10 CÂU O5</button>
-            <button class="btn-action btn-danger" onclick="clearTerminal()">🧹 XÓA</button>
+            <button type="button" class="btn-action" id="btn-o5" onclick="fetch10O5WithDelay()">10 CÂU O5</button>
+            <button type="button" class="btn-action btn-danger" onclick="clearTerminal()">🧹 XÓA</button>
         </div>
     </div>
 
@@ -312,16 +319,11 @@ HTML_TEMPLATE = """
         const Telegram = window.Telegram.WebApp;
         Telegram.expand();
 
-        const rawChat = {{ raw_chat | tojson }};
+        // FIX LỖI JSON TRÊN TELEGRAM WEBAPP
+        const rawChat = {{ raw_chat | tojson | safe }};
         const terminal = document.getElementById('terminal');
         const logsContainer = document.getElementById('logs-container');
         let isGenerating = false;
-
-        function focusInput() {
-            if (!window.getSelection().toString()) {
-                document.getElementById('chat-input').focus();
-            }
-        }
 
         function scrollToBottom() {
             terminal.scrollTop = terminal.scrollHeight;
@@ -364,10 +366,11 @@ HTML_TEMPLATE = """
             scrollToBottom();
         }
 
+        /* TOÀN BỘ CHAT HIỂN THỊ ĐỀU DÙNG TOOL VIP 7 MÀU (ĐÃ XÓA 💬) */
         function appendChatBox(text) {
             const div = document.createElement('div');
             div.className = 'log-chat';
-            div.innerHTML = `<span>💬 ${escapeHtml(text)}</span> <span style="opacity:0.6; font-size:10px;">📋 COPY</span>`;
+            div.innerHTML = `<div><span class="tool-vip-rainbow">TOOL VIP:</span> <span style="color:#ffffff;">${escapeHtml(text)}</span></div> <span style="opacity:0.6; font-size:10px;">📋 COPY</span>`;
             div.onclick = (e) => copyToClipboard(text, e);
             logsContainer.appendChild(div);
             scrollToBottom();
@@ -379,16 +382,14 @@ HTML_TEMPLATE = """
         function getCasinoAiResponse(input) {
             const low = input.toLowerCase().trim();
 
-            // 1. Hướng dẫn sử dụng & Lệnh
             if (low.includes('sài') || low.includes('dùng') || low.includes('sử dụng') || low.includes('hướng dẫn') || low.includes('lệnh') || low.includes('help')) {
                 return "🎯 HƯỚNG DẪN SỬ DỤNG TOOL VIP:\n" +
-                       "1️⃣ Gõ [o5] hoặc bấm [💬 10 CÂU O5]: Tool tự xuất 10 câu chat kéo ca Baccarat (mỗi câu cách 1s).\n" +
+                       "1️⃣ Gõ [o5] hoặc bấm nút [10 CÂU O5]: Tool tự xuất 10 câu chat kéo ca Baccarat (mỗi câu cách 1s).\n" +
                        "2️⃣ Gõ nội dung bất kỳ: Tool tạo thẻ Chat 1-chạm để copy cực nhanh quăng vào nhóm.\n" +
-                       "3️⃣ Bấm [🧹 XÓA]: Dọn dẹp màn hình Terminal.\n" +
+                       "3️⃣ Bấm nút [🧹 XÓA]: Dọn dẹp màn hình Terminal.\n" +
                        "4️⃣ Hỏi bất kỳ điều gì: TOOL VIP AI sẽ giải đáp & tư vấn soi cầu 24/7 cho sếp!";
             }
 
-            // 2. Soi cầu / Kinh nghiệm Baccarat
             if (low.includes('soi cầu') || low.includes('baccarat') || low.includes('con hay cái') || low.includes('banker') || low.includes('player') || low.includes('bệt') || low.includes('bẻ')) {
                 return "🎰 MẸO SOI CẦU CASINO TỪ TOOL VIP:\n" +
                        "- Cầu bệt (4-5 tay cùng màu): Đu theo Banker/Player tới khi gãy, tuyệt đối không bẻ gấp thếp!\n" +
@@ -396,23 +397,26 @@ HTML_TEMPLATE = """
                        "- Giữ đầu lạnh, quản lý vốn 1-2-4 là tỷ lệ thắng lên tới 90%!";
             }
 
-            // 3. Về bờ / Kéo ca / Vốn
             if (low.includes('về bờ') || low.includes('kéo ca') || low.includes('vốn') || low.includes('nạp tiền')) {
                 return "💰 Kế hoạch về bờ an toàn:\nSếp chuẩn bị sẵn mức vốn an toàn vào game, theo đúng lệnh quản lý vốn ca kéo. Húp đủ 2M - 5M chốt lãi ngay không tham sếp nhé!";
             }
 
-            // 4. Thua / Cháy tài khoản / Tâm lý
             if (low.includes('thua') || low.includes('cháy') || low.includes('xui') || low.includes('cay')) {
                 return "⚠️ Trong sảnh Casino, tâm lý quyết định 80% chiến thắng! Khi xui sếp nên nghỉ tay 15 phút xả xui. Bình tĩnh quay lại đi đúng kỷ luật sẽ gỡ lại cả vốn lẫn lời!";
             }
 
-            // 5. Lời chào
             if (low.includes('chào') || low.includes('hi') || low.includes('hello') || low.includes('sếp') || low.includes('admin')) {
                 return "🔥 Chào sếp lớn! TOOL VIP AI sẵn sàng cùng sếp chinh phục sảnh Casino hôm nay. Sếp cần soi cầu hay lấy lệnh cứ bảo em!";
             }
 
-            // 6. Các câu hỏi đời sống / ngoài lề khác
             return `🤖 [TOOL VIP AI]: Em đã nhận thông tin "${input}". Dưới góc nhìn chuyên gia Baccarat/Casino thì làm gì cũng cần sự tính toán & quản lý vốn kỷ luật sếp nhé. Sếp cần tư vấn lệnh hay cách dùng tool cứ nhắn em!`;
+        }
+
+        // XỬ LÝ SỰ KIỆN SUBMIT FORM (ĐÃ SỬA LỖI ĐIỆN THOẠI)
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            sendChatMessage();
+            return false;
         }
 
         function sendChatMessage() {
@@ -420,7 +424,6 @@ HTML_TEMPLATE = """
             const val = input.value.trim();
             if (!val) return;
 
-            // Hiển thị tin nhắn Admin Panel (Xanh lá)
             appendAdminMsg(val);
             input.value = '';
 
@@ -428,17 +431,10 @@ HTML_TEMPLATE = """
                 if (val.toLowerCase() === 'o5') {
                     fetch10O5WithDelay();
                 } else {
-                    // TOOL VIP AI trả lời câu hỏi
                     const aiReply = getCasinoAiResponse(val);
                     appendToolVipMsg(aiReply);
                 }
             }, 300);
-        }
-
-        function handleKeyPress(e) {
-            if (e.key === 'Enter') {
-                sendChatMessage();
-            }
         }
 
         // TẠO 10 CÂU O5 CÁCH NHAU MỖI 1 GIÂY
@@ -465,7 +461,7 @@ HTML_TEMPLATE = """
                     isGenerating = false;
                     btn.disabled = false;
                     btn.style.opacity = '1';
-                    btn.innerText = '💬 10 CÂU O5';
+                    btn.innerText = '10 CÂU O5';
                     appendToolVipMsg('Hoàn tất xuất 10 câu O5 sếp nhé!');
                 }
             }, 1000);
