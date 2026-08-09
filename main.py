@@ -45,7 +45,7 @@ ALL_SENTENCES = [
 ]
 
 # ----------------------------------------------------
-# 2. FLASK WEBAPP - GIAO DIỆN SẢNH TERMINAL ĐEN
+# 2. FLASK WEBAPP - GIAO DIỆN TERMINAL PHUC
 # ----------------------------------------------------
 app = Flask(__name__)
 
@@ -55,7 +55,7 @@ HTML_TEMPLATE = """
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TX68 TERMINAL LOBBY</title>
+    <title>PHUC TERMINAL LOBBY</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * { box-sizing: border-box; }
@@ -63,13 +63,55 @@ HTML_TEMPLATE = """
             background-color: #0c0d0e;
             color: #00ff66;
             font-family: 'Consolas', 'Courier New', monospace;
-            padding: 10px;
+            padding: 8px;
             margin: 0;
             display: flex;
             flex-direction: column;
             height: 100vh;
             overflow: hidden;
         }
+
+        /* KHUNG CHỨA TOÀN BỘ APP */
+        .app-wrapper {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            width: 100%;
+        }
+
+        /* NÚT CHỨC NĂNG CỦA MÁY TÍNH (ẢN Ở ĐT) */
+        .pc-dots {
+            display: none;
+        }
+
+        /* TỐI ƯU CHO GIAO DIỆN MÁY TÍNH (PC) */
+        @media (min-width: 768px) {
+            body {
+                justify-content: center;
+                align-items: center;
+                background-color: #050505;
+                padding: 20px;
+            }
+            .app-wrapper {
+                max-width: 800px;
+                height: 90vh;
+                border: 1px solid #00ff66;
+                border-radius: 8px;
+                padding: 15px;
+                background: #0c0d0e;
+                box-shadow: 0 0 25px rgba(0, 255, 102, 0.2);
+            }
+            .pc-dots {
+                display: flex;
+                gap: 6px;
+                margin-bottom: 10px;
+            }
+            .dot { width: 12px; height: 12px; border-radius: 50%; }
+            .dot-red { background: #ff5f56; }
+            .dot-yellow { background: #ffbd2e; }
+            .dot-green { background: #27c93f; }
+        }
+
         .header {
             font-size: 10px;
             white-space: pre;
@@ -78,7 +120,9 @@ HTML_TEMPLATE = """
             line-height: 1.1;
             margin-bottom: 8px;
             user-select: none;
+            font-weight: bold;
         }
+
         .status-bar {
             background: #141619;
             border: 1px solid #22252a;
@@ -103,6 +147,7 @@ HTML_TEMPLATE = """
             font-size: 12px;
             line-height: 1.5;
             box-shadow: inset 0 0 10px rgba(0, 255, 102, 0.1);
+            cursor: pointer;
         }
         .log-line {
             margin-bottom: 4px;
@@ -114,11 +159,14 @@ HTML_TEMPLATE = """
         .log-chat {
             background: #111;
             border-left: 3px solid #00ff66;
-            padding: 4px 8px;
-            margin: 4px 0;
+            padding: 6px 8px;
+            margin: 5px 0;
             color: #fff;
             cursor: pointer;
             border-radius: 2px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         .log-chat:active {
             background: #00ff66;
@@ -154,7 +202,7 @@ HTML_TEMPLATE = """
             background: #00ff66;
             color: #000;
             border: none;
-            padding: 0 14px;
+            padding: 0 16px;
             font-family: inherit;
             font-weight: bold;
             cursor: pointer;
@@ -164,7 +212,7 @@ HTML_TEMPLATE = """
         /* NÚT TƯƠNG TÁC NHANH */
         .quick-actions {
             display: flex;
-            gap: 6px;
+            gap: 8px;
             margin-top: 8px;
         }
         .btn-action {
@@ -172,17 +220,27 @@ HTML_TEMPLATE = """
             background: #181a1f;
             color: #00e5ff;
             border: 1px solid #00e5ff;
-            padding: 8px 0;
+            padding: 10px 0;
             font-family: inherit;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: bold;
             cursor: pointer;
-            border-radius: 3px;
+            border-radius: 4px;
             text-align: center;
+            transition: all 0.2s;
         }
         .btn-action:active {
             background: #00e5ff;
             color: #000;
+        }
+        .btn-danger {
+            border-color: #ff5555;
+            color: #ff5555;
+            flex: 0.4;
+        }
+        .btn-danger:active {
+            background: #ff5555;
+            color: #fff;
         }
 
         .toast {
@@ -203,40 +261,48 @@ HTML_TEMPLATE = """
 </head>
 <body>
 
-    <div class="header">
-   ___ ____  _  _    ____ ____ _  _ ____ 
-  |_  |__  || || |  |  __|  __| || |  __|
-  |  _|  | || || |_ |  __|  __| || |  __|
-  |___|  |_||__   _||____|____|____|____|
-    </div>
+    <div class="app-wrapper">
+        <!-- HEADER CỬA SỔ PC -->
+        <div class="pc-dots">
+            <div class="dot dot-red"></div>
+            <div class="dot dot-yellow"></div>
+            <div class="dot dot-green"></div>
+        </div>
 
-    <div class="status-bar">
-        <div>STATUS: <span>ACTIVE</span></div>
-        <div>SERVER: <span>RENDER_NODE_01</span></div>
-    </div>
+        <!-- ASCII HEADER "PHUC" IN ĐẬM -->
+        <div class="header">
+ ___  _  _ _  _ ____ 
+|  _]| || | || |  __|
+| |  | || | || | |__ 
+|_|  |_||_|____|____|
+        </div>
 
-    <!-- MÀN HÌNH TERMINAL CHÁT -->
-    <div class="terminal-window" id="terminal">
-        <div class="log-line log-sys">20:21:30 INCOMING HTTP REQUEST DETECTED ...</div>
-        <div class="log-line log-sys">20:21:33 SERVICE WAKING UP ...</div>
-        <div class="log-line log-bot">[SYSTEM] Sảnh Terminal TX68 đã sẵn sàng!</div>
-        <div class="log-line log-bot">[SYSTEM] Bạn có thể gõ nội dung hoặc dùng các nút lệnh bên dưới.</div>
-        <div class="log-line log-sys">--------------------------------------------------</div>
-    </div>
+        <div class="status-bar">
+            <div>STATUS: <span>ACTIVE</span></div>
+            <div>SERVER: <span>RENDER_NODE_01</span></div>
+        </div>
 
-    <!-- NÚT ĐIỀU KHIỂN NHANH -->
-    <div class="quick-actions">
-        <button class="btn-action" onclick="fetch10O5()">💬 10 CÂU O5</button>
-        <button class="btn-action" onclick="playGame('PLAYER')">🔵 CƯỢC CON</button>
-        <button class="btn-action" onclick="playGame('BANKER')">🔴 CƯỢC CÁI</button>
-        <button class="btn-action" style="border-color:#ff5555; color:#ff5555;" onclick="clearTerminal()">🧹 XÓA</button>
-    </div>
+        <!-- MÀN HÌNH TERMINAL CHÁT (BẤM VÀO LÀ TỰ NHẢY VÀO KHUNG NHẬP) -->
+        <div class="terminal-window" id="terminal" onclick="focusInput()">
+            <div class="log-line log-sys">20:21:30 INCOMING HTTP REQUEST DETECTED ...</div>
+            <div class="log-line log-sys">20:21:33 SERVICE WAKING UP ...</div>
+            <div class="log-line log-bot">[SYSTEM] Sảnh Terminal PHUC đã sẵn sàng!</div>
+            <div class="log-line log-bot">[SYSTEM] Nhấp vào màn hình để gõ lệnh hoặc bấm nút [10 CÂU O5].</div>
+            <div class="log-line log-sys">--------------------------------------------------</div>
+        </div>
 
-    <!-- KHUNG CHAT / NHẬP LỆNH -->
-    <div class="input-box">
-        <span class="prompt-symbol">root@tx68:~#</span>
-        <input type="text" id="chat-input" placeholder="Gõ tin nhắn hoặc lệnh..." onkeydown="handleKeyPress(event)">
-        <button class="btn-send" onclick="sendChatMessage()">GỬI</button>
+        <!-- NÚT ĐIỀU KHIỂN NHANH (ĐÃ XÓA CƯỢC CON/CÁI) -->
+        <div class="quick-actions">
+            <button class="btn-action" id="btn-o5" onclick="fetch10O5WithDelay()">💬 10 CÂU O5</button>
+            <button class="btn-action btn-danger" onclick="clearTerminal()">🧹 XÓA</button>
+        </div>
+
+        <!-- KHUNG CHAT / NHẬP LỆNH -->
+        <div class="input-box">
+            <span class="prompt-symbol">root@tx68:~#</span>
+            <input type="text" id="chat-input" placeholder="Gõ tin nhắn hoặc lệnh..." onkeydown="handleKeyPress(event)">
+            <button class="btn-send" onclick="sendChatMessage()">GỬI</button>
+        </div>
     </div>
 
     <div class="toast" id="toast">ĐÃ COPY!</div>
@@ -247,6 +313,14 @@ HTML_TEMPLATE = """
 
         const rawChat = {{ raw_chat | tojson }};
         const terminal = document.getElementById('terminal');
+        let isGenerating = false;
+
+        function focusInput() {
+            // Khi ấn vào khung đen terminal, tự động focus vào input gõ
+            if (!window.getSelection().toString()) {
+                document.getElementById('chat-input').focus();
+            }
+        }
 
         function scrollToBottom() {
             terminal.scrollTop = terminal.scrollHeight;
@@ -259,7 +333,8 @@ HTML_TEMPLATE = """
             setTimeout(() => { toast.style.display = 'none'; }, 1200);
         }
 
-        function copyToClipboard(text) {
+        function copyToClipboard(text, e) {
+            if (e) e.stopPropagation(); // Ngăn kích hoạt focusInput() khi bấm copy
             navigator.clipboard.writeText(text).then(() => {
                 showToast('COPIED: "' + text + '"');
             });
@@ -281,8 +356,8 @@ HTML_TEMPLATE = """
         function appendChatBox(text) {
             const div = document.createElement('div');
             div.className = 'log-chat';
-            div.innerHTML = `<span>💬 ${text}</span> <span style="float:right; opacity:0.6; font-size:10px;">[NHẤP ĐỂ COPY]</span>`;
-            div.onclick = () => copyToClipboard(text);
+            div.innerHTML = `<span>💬 ${text}</span> <span style="opacity:0.6; font-size:10px;">📋 COPY</span>`;
+            div.onclick = (e) => copyToClipboard(text, e);
             terminal.appendChild(div);
             scrollToBottom();
         }
@@ -295,14 +370,13 @@ HTML_TEMPLATE = """
             appendLog(`USER: ${val}`, 'log-user');
             input.value = '';
 
-            // Tự động phản hồi kiểu Terminal
             setTimeout(() => {
                 if (val.toLowerCase() === 'o5') {
-                    fetch10O5();
+                    fetch10O5WithDelay();
                 } else {
                     appendChatBox(val);
                 }
-            }, 300);
+            }, 200);
         }
 
         function handleKeyPress(e) {
@@ -311,31 +385,38 @@ HTML_TEMPLATE = """
             }
         }
 
-        function fetch10O5() {
-            appendLog('EXECUTE: Get 10 Baccarat Chat Lines...', 'log-sys');
+        // TẠO 10 CÂU O5 CÁCH NHAU MỖI 1 GIÂY (CHỐNG SPAM)
+        function fetch10O5WithDelay() {
+            if (isGenerating) return; // Nếu đang chạy thì ngắt không cho spam nút
+
+            isGenerating = true;
+            const btn = document.getElementById('btn-o5');
+            btn.disabled = true;
+            btn.style.opacity = '0.5';
+
+            appendLog('EXECUTE: Đang xuất 10 câu O5 (mỗi câu cách 1s)...', 'log-sys');
+
             let shuffled = [...rawChat].sort(() => 0.5 - Math.random()).slice(0, 10);
-            shuffled.forEach(s => appendChatBox(s));
-        }
+            let count = 0;
 
-        function playGame(choice) {
-            appendLog(`BET: ${choice}`, 'log-user');
-            const p = Math.floor(Math.random() * 10);
-            const b = Math.floor(Math.random() * 10);
-            const win = p > b ? 'PLAYER' : (b > p ? 'BANKER' : 'TIE');
-
-            setTimeout(() => {
-                appendLog(`RESULT: 🔵 Player: ${p} | 🔴 Banker: ${b}`, 'log-sys');
-                if (win === choice) {
-                    appendLog(`>> SUCCESS! Bạn đã đoán đúng cửa ${choice}!`, 'log-bot');
-                } else if (win === 'TIE') {
-                    appendLog(`>> RESULT: Hoà nút!`, 'log-sys');
+            let timer = setInterval(() => {
+                if (count < shuffled.length) {
+                    appendChatBox(shuffled[count]);
+                    count++;
+                    btn.innerText = `⏳ ĐANG TẠO (${count}/10)...`;
                 } else {
-                    appendLog(`>> FAIL! Cửa thắng là ${win}`, 'log-sys');
+                    clearInterval(timer);
+                    isGenerating = false;
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
+                    btn.innerText = '💬 10 CÂU O5';
+                    appendLog('STATUS: Hoàn tất xuất 10 câu!', 'log-sys');
                 }
-            }, 400);
+            }, 1000); // Cách nhau chính xác 1000ms = 1s
         }
 
         function clearTerminal() {
+            if (isGenerating) return;
             terminal.innerHTML = '<div class="log-line log-sys">[SYSTEM] Màn hình đã được làm sạch.</div>';
         }
     </script>
@@ -364,19 +445,18 @@ bot = telebot.TeleBot(TOKEN)
 def handle_all_messages(message):
     markup = InlineKeyboardMarkup()
     web_app_info = WebAppInfo(url=RENDER_URL)
-    markup.add(InlineKeyboardButton("🖥️ MỞ SẢNH TERMINAL CHAT", web_app=web_app_info))
+    markup.add(InlineKeyboardButton("🖥️ MỞ PHUC TERMINAL CHAT", web_app=web_app_info))
 
     msg_text = (
-        "<b>[ - TX68 TERMINAL LOBBY - ]</b>\n"
+        "<b>[ - PHUC TERMINAL LOBBY - ]</b>\n"
         "<code>═════════════════════════════════════</code>\n"
         "<code>Bấm nút bên dưới để mở Sảnh Chat Terminal</code>\n"
-        "<code>màn hình đen, gõ chat & chơi game trực tiếp!</code>\n"
+        "<code>màn hình đen, gõ chat & copy 1-chạm!</code>\n"
         "<code>═════════════════════════════════════</code>"
     )
     bot.reply_to(message, msg_text, parse_mode="HTML", reply_markup=markup)
 
 if __name__ == "__main__":
     threading.Thread(target=run_flask, daemon=True).start()
-    print("Sảnh Terminal đang chạy...")
+    print("Sảnh Terminal PHUC đang chạy...")
     bot.infinity_polling()
-    
