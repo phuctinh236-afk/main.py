@@ -45,7 +45,7 @@ ALL_SENTENCES = [
 ]
 
 # ----------------------------------------------------
-# 2. FLASK WEBAPP - GIAO DIỆN TERMINAL PHUC
+# 2. FLASK WEBAPP - GIAO DIỆN TERMINAL VIP
 # ----------------------------------------------------
 app = Flask(__name__)
 
@@ -71,7 +71,6 @@ HTML_TEMPLATE = """
             overflow: hidden;
         }
 
-        /* KHUNG CHỨA TOÀN BỘ APP */
         .app-wrapper {
             display: flex;
             flex-direction: column;
@@ -79,12 +78,8 @@ HTML_TEMPLATE = """
             width: 100%;
         }
 
-        /* NÚT CHỨC NĂNG CỦA MÁY TÍNH (ẨN Ở ĐT) */
-        .pc-dots {
-            display: none;
-        }
+        .pc-dots { display: none; }
 
-        /* TỐI ƯU CHO GIAO DIỆN MÁY TÍNH (PC) */
         @media (min-width: 768px) {
             body {
                 justify-content: center;
@@ -136,6 +131,28 @@ HTML_TEMPLATE = """
         }
         .status-bar span { color: #00ff66; font-weight: bold; }
         
+        /* CẤU HÌNH MÀU SẮC YÊU CẦU */
+        .admin-panel-prefix {
+            color: #00ff66 !important; /* MÀU XANH LÁ */
+            font-weight: bold;
+        }
+
+        /* CHỮ 7 MÀU LIÊN TỤC CHO TOOL VIP */
+        .tool-vip-rainbow {
+            background: linear-gradient(90deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #8b00ff, #ff0000);
+            background-size: 200% auto;
+            color: transparent;
+            -webkit-background-clip: text;
+            background-clip: text;
+            animation: rainbow 2s linear infinite;
+            font-weight: bold;
+        }
+
+        @keyframes rainbow {
+            0% { background-position: 0% center; }
+            100% { background-position: 200% center; }
+        }
+
         /* KHUNG TERMINAL LOG CHÁT */
         .terminal-window {
             flex: 1;
@@ -151,17 +168,17 @@ HTML_TEMPLATE = """
             display: flex;
             flex-direction: column;
         }
+
         #logs-container {
             display: flex;
             flex-direction: column;
         }
+
         .log-line {
-            margin-bottom: 4px;
+            margin-bottom: 6px;
             word-break: break-word;
         }
-        .log-sys { color: #888; }
-        .log-user { color: #00e5ff; }
-        .log-bot { color: #00ff66; }
+
         .log-chat {
             background: #111;
             border-left: 3px solid #00ff66;
@@ -187,11 +204,7 @@ HTML_TEMPLATE = """
             margin-top: 6px;
             padding-bottom: 8px;
         }
-        .prompt-symbol {
-            color: #00e5ff;
-            font-weight: bold;
-            white-space: nowrap;
-        }
+
         .inline-input-line input {
             flex: 1;
             background: transparent;
@@ -203,7 +216,6 @@ HTML_TEMPLATE = """
             caret-color: #00ff66;
         }
 
-        /* NÚT TƯƠNG TÁC NHANH */
         .quick-actions {
             display: flex;
             gap: 8px;
@@ -256,14 +268,12 @@ HTML_TEMPLATE = """
 <body>
 
     <div class="app-wrapper">
-        <!-- HEADER CỬA SỔ PC -->
         <div class="pc-dots">
             <div class="dot dot-red"></div>
             <div class="dot dot-yellow"></div>
             <div class="dot dot-green"></div>
         </div>
 
-        <!-- ASCII HEADER "PHUC" IN ĐẬM -->
         <div class="header">
  ___  _  _ _  _ ____ 
 |  _]| || | || |  __|
@@ -273,27 +283,23 @@ HTML_TEMPLATE = """
 
         <div class="status-bar">
             <div>STATUS: <span>ACTIVE</span></div>
-            <div>SERVER: <span>RENDER_NODE_01</span></div>
+            <div>AI BOT: <span>CASINO_AI_V3</span></div>
         </div>
 
-        <!-- MÀN HÌNH TERMINAL CHÁT (ẤN VÀO LÀ TỰ NHẢY VÀO DÒNG NHẬP LỆNH) -->
+        <!-- MÀN HÌNH TERMINAL CHÁT -->
         <div class="terminal-window" id="terminal" onclick="focusInput()">
             <div id="logs-container">
-                <div class="log-line log-sys">20:21:30 INCOMING HTTP REQUEST DETECTED ...</div>
-                <div class="log-line log-sys">20:21:33 SERVICE WAKING UP ...</div>
-                <div class="log-line log-bot">[SYSTEM] Sảnh Terminal PHUC đã sẵn sàng!</div>
-                <div class="log-line log-bot">[SYSTEM] Nhấp vào màn hình để gõ chat hoặc bấm nút [10 CÂU O5].</div>
-                <div class="log-line log-sys">--------------------------------------------------</div>
+                <div class="log-line"><span class="tool-vip-rainbow">TOOL VIP:</span> <span style="color:#00e5ff;">Chào sếp! Sảnh Terminal AI Baccarat đã kích hoạt. Sếp cần hướng dẫn sử dụng hay soi cầu cứ nhắn nhé!</span></div>
+                <div class="log-line" style="color:#555;">--------------------------------------------------</div>
             </div>
 
-            <!-- DÒNG NHẬP CHAT TRỰC TIẾP NGAY BÊN DƯỚI DÒNG TIN MỚI NHẤT -->
+            <!-- DÒNG NHẬP CHAT MÀU XANH HÌNH ADMIN PANEL -->
             <div class="inline-input-line">
-                <span class="prompt-symbol">admin panel:</span>
-                <input type="text" id="chat-input" placeholder="Gõ tin nhắn rồi ấn Enter..." onkeydown="handleKeyPress(event)" autocomplete="off">
+                <span class="admin-panel-prefix">admin panel:</span>
+                <input type="text" id="chat-input" placeholder="Nhập câu hỏi hoặc 'o5'..." onkeydown="handleKeyPress(event)" autocomplete="off">
             </div>
         </div>
 
-        <!-- NÚT ĐIỀU KHIỂN NHANH -->
         <div class="quick-actions">
             <button class="btn-action" id="btn-o5" onclick="fetch10O5WithDelay()">💬 10 CÂU O5</button>
             <button class="btn-action btn-danger" onclick="clearTerminal()">🧹 XÓA</button>
@@ -312,7 +318,6 @@ HTML_TEMPLATE = """
         let isGenerating = false;
 
         function focusInput() {
-            // Nhấp vào bất kỳ điểm nào trong Terminal là tự động focus vào ô nhập chat
             if (!window.getSelection().toString()) {
                 document.getElementById('chat-input').focus();
             }
@@ -336,15 +341,25 @@ HTML_TEMPLATE = """
             });
         }
 
-        function getTime() {
-            const d = new Date();
-            return d.toTimeString().split(' ')[0];
+        function escapeHtml(text) {
+            return text.replace(/&/g, "&amp;")
+                       .replace(/</g, "&lt;")
+                       .replace(/>/g, "&gt;");
         }
 
-        function appendLog(text, type = 'log-bot') {
+        function appendAdminMsg(text) {
             const div = document.createElement('div');
-            div.className = 'log-line ' + type;
-            div.innerText = `[${getTime()}] ${text}`;
+            div.className = 'log-line';
+            div.innerHTML = `<span class="admin-panel-prefix">admin panel:</span> <span style="color:#ffffff;">${escapeHtml(text)}</span>`;
+            logsContainer.appendChild(div);
+            scrollToBottom();
+        }
+
+        function appendToolVipMsg(text) {
+            const div = document.createElement('div');
+            div.className = 'log-line';
+            const formatted = escapeHtml(text).replace(/\n/g, '<br>');
+            div.innerHTML = `<span class="tool-vip-rainbow">TOOL VIP:</span> <span style="color:#00e5ff;">${formatted}</span>`;
             logsContainer.appendChild(div);
             scrollToBottom();
         }
@@ -352,10 +367,52 @@ HTML_TEMPLATE = """
         function appendChatBox(text) {
             const div = document.createElement('div');
             div.className = 'log-chat';
-            div.innerHTML = `<span>💬 ${text}</span> <span style="opacity:0.6; font-size:10px;">📋 COPY</span>`;
+            div.innerHTML = `<span>💬 ${escapeHtml(text)}</span> <span style="opacity:0.6; font-size:10px;">📋 COPY</span>`;
             div.onclick = (e) => copyToClipboard(text, e);
             logsContainer.appendChild(div);
             scrollToBottom();
+        }
+
+        // ----------------------------------------------------
+        // TRÍ TUỆ NHÂN TẠO AI CASINO & HƯỚNG DẪN DÙNG TOOL
+        // ----------------------------------------------------
+        function getCasinoAiResponse(input) {
+            const low = input.toLowerCase().trim();
+
+            // 1. Hướng dẫn sử dụng & Lệnh
+            if (low.includes('sài') || low.includes('dùng') || low.includes('sử dụng') || low.includes('hướng dẫn') || low.includes('lệnh') || low.includes('help')) {
+                return "🎯 HƯỚNG DẪN SỬ DỤNG TOOL VIP:\n" +
+                       "1️⃣ Gõ [o5] hoặc bấm [💬 10 CÂU O5]: Tool tự xuất 10 câu chat kéo ca Baccarat (mỗi câu cách 1s).\n" +
+                       "2️⃣ Gõ nội dung bất kỳ: Tool tạo thẻ Chat 1-chạm để copy cực nhanh quăng vào nhóm.\n" +
+                       "3️⃣ Bấm [🧹 XÓA]: Dọn dẹp màn hình Terminal.\n" +
+                       "4️⃣ Hỏi bất kỳ điều gì: TOOL VIP AI sẽ giải đáp & tư vấn soi cầu 24/7 cho sếp!";
+            }
+
+            // 2. Soi cầu / Kinh nghiệm Baccarat
+            if (low.includes('soi cầu') || low.includes('baccarat') || low.includes('con hay cái') || low.includes('banker') || low.includes('player') || low.includes('bệt') || low.includes('bẻ')) {
+                return "🎰 MẸO SOI CẦU CASINO TỪ TOOL VIP:\n" +
+                       "- Cầu bệt (4-5 tay cùng màu): Đu theo Banker/Player tới khi gãy, tuyệt đối không bẻ gấp thếp!\n" +
+                       "- Cầu 1-1: Đi đều tay, chốt lãi khi đạt 20-30% vốn.\n" +
+                       "- Giữ đầu lạnh, quản lý vốn 1-2-4 là tỷ lệ thắng lên tới 90%!";
+            }
+
+            // 3. Về bờ / Kéo ca / Vốn
+            if (low.includes('về bờ') || low.includes('kéo ca') || low.includes('vốn') || low.includes('nạp tiền')) {
+                return "💰 Kế hoạch về bờ an toàn:\nSếp chuẩn bị sẵn mức vốn an toàn vào game, theo đúng lệnh quản lý vốn ca kéo. Húp đủ 2M - 5M chốt lãi ngay không tham sếp nhé!";
+            }
+
+            // 4. Thua / Cháy tài khoản / Tâm lý
+            if (low.includes('thua') || low.includes('cháy') || low.includes('xui') || low.includes('cay')) {
+                return "⚠️ Trong sảnh Casino, tâm lý quyết định 80% chiến thắng! Khi xui sếp nên nghỉ tay 15 phút xả xui. Bình tĩnh quay lại đi đúng kỷ luật sẽ gỡ lại cả vốn lẫn lời!";
+            }
+
+            // 5. Lời chào
+            if (low.includes('chào') || low.includes('hi') || low.includes('hello') || low.includes('sếp') || low.includes('admin')) {
+                return "🔥 Chào sếp lớn! TOOL VIP AI sẵn sàng cùng sếp chinh phục sảnh Casino hôm nay. Sếp cần soi cầu hay lấy lệnh cứ bảo em!";
+            }
+
+            // 6. Các câu hỏi đời sống / ngoài lề khác
+            return `🤖 [TOOL VIP AI]: Em đã nhận thông tin "${input}". Dưới góc nhìn chuyên gia Baccarat/Casino thì làm gì cũng cần sự tính toán & quản lý vốn kỷ luật sếp nhé. Sếp cần tư vấn lệnh hay cách dùng tool cứ nhắn em!`;
         }
 
         function sendChatMessage() {
@@ -363,16 +420,19 @@ HTML_TEMPLATE = """
             const val = input.value.trim();
             if (!val) return;
 
-            appendLog(`USER: ${val}`, 'log-user');
+            // Hiển thị tin nhắn Admin Panel (Xanh lá)
+            appendAdminMsg(val);
             input.value = '';
 
             setTimeout(() => {
                 if (val.toLowerCase() === 'o5') {
                     fetch10O5WithDelay();
                 } else {
-                    appendChatBox(val);
+                    // TOOL VIP AI trả lời câu hỏi
+                    const aiReply = getCasinoAiResponse(val);
+                    appendToolVipMsg(aiReply);
                 }
-            }, 200);
+            }, 300);
         }
 
         function handleKeyPress(e) {
@@ -390,7 +450,7 @@ HTML_TEMPLATE = """
             btn.disabled = true;
             btn.style.opacity = '0.5';
 
-            appendLog('EXECUTE: Đang xuất 10 câu O5 (mỗi câu cách 1s)...', 'log-sys');
+            appendToolVipMsg('Đang kích hoạt gói 10 câu O5 kéo ca (mỗi câu cách 1s)...');
 
             let shuffled = [...rawChat].sort(() => 0.5 - Math.random()).slice(0, 10);
             let count = 0;
@@ -406,14 +466,14 @@ HTML_TEMPLATE = """
                     btn.disabled = false;
                     btn.style.opacity = '1';
                     btn.innerText = '💬 10 CÂU O5';
-                    appendLog('STATUS: Hoàn tất xuất 10 câu!', 'log-sys');
+                    appendToolVipMsg('Hoàn tất xuất 10 câu O5 sếp nhé!');
                 }
             }, 1000);
         }
 
         function clearTerminal() {
             if (isGenerating) return;
-            logsContainer.innerHTML = '<div class="log-line log-sys">[SYSTEM] Màn hình đã được làm sạch.</div>';
+            logsContainer.innerHTML = '<div class="log-line"><span class="tool-vip-rainbow">TOOL VIP:</span> <span style="color:#00e5ff;">Màn hình đã được dọn sạch. Sếp cần hỗ trợ gì cứ nhắn nhé!</span></div>';
             scrollToBottom();
         }
     </script>
@@ -442,19 +502,19 @@ bot = telebot.TeleBot(TOKEN)
 def handle_all_messages(message):
     markup = InlineKeyboardMarkup()
     web_app_info = WebAppInfo(url=RENDER_URL)
-    markup.add(InlineKeyboardButton("🖥️ MỞ PHUC TERMINAL CHAT", web_app=web_app_info))
+    markup.add(InlineKeyboardButton("🖥️ MỞ TOOL VIP TERMINAL", web_app=web_app_info))
 
     msg_text = (
-        "<b>[ - PHUC TERMINAL LOBBY - ]</b>\n"
+        "<b>[ - TOOL VIP CASINO TERMINAL - ]</b>\n"
         "<code>═════════════════════════════════════</code>\n"
         "<code>Bấm nút bên dưới để mở Sảnh Chat Terminal</code>\n"
-        "<code>màn hình đen, gõ chat & copy 1-chạm!</code>\n"
+        "<code>Tích hợp AI Trợ Lý Casino & Soi Cầu 24/7!</code>\n"
         "<code>═════════════════════════════════════</code>"
     )
     bot.reply_to(message, msg_text, parse_mode="HTML", reply_markup=markup)
 
 if __name__ == "__main__":
     threading.Thread(target=run_flask, daemon=True).start()
-    print("Sảnh Terminal PHUC đang chạy...")
+    print("Sảnh Terminal TOOL VIP đang chạy...")
     bot.infinity_polling()
     
