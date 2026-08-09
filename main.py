@@ -7,83 +7,7 @@ import telebot
 from telebot.types import InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
 
 # ----------------------------------------------------
-# 1. HÀM TẠO TỰ ĐỘNG 10.000+ CÂU CHAT BACCARAT NHƯ NGƯỜI THẬT
-# ----------------------------------------------------
-def build_10k_player_chats():
-    chats = set()
-
-    # Kho từ vựng tự nhiên của dân chơi Baccarat / Casino
-    xung_ho = ["Sếp ơi", "Anh ơi", "Idol ơi", "Đại ca ơi", "Admin ơi", "Sếp lớn", "A ơi", "Chủ phòng", "Sếp VIP", "Idol Baccarat"]
-
-    # 1. Nhóm nạp vốn / chuẩn bị
-    nap_hanh_dong = ["em mới nạp", "vừa vào vốn", "đã nạp sẵn", "vừa bơm thêm", "em lên vốn", "vừa vào tiền", "mới chuyển cọc"]
-    tien_von = ["500k", "1m", "2m", "3m", "5m", "10m", "15m", "20m", "50m"]
-    trang_thai_von = ["chờ sếp hô lệnh", "chờ sếp lên live", "sẵn sàng chiến rồi", "đợi sếp phát lệnh", "chuẩn bị vào ca", "chờ kéo về bờ"]
-
-    for x in xung_ho:
-        for act in nap_hanh_dong:
-            for tv in tien_von:
-                for tt in trang_thai_von:
-                    chats.add(f"{x} {act} {tv} {tt}")
-
-    # 2. Nhóm húp tiền / khoe thắng
-    hup_hanh_dong = ["vừa húp gọn", "mới bú đậm", "lại cộng thêm", "ăn trọn quả", "đã bú nhẹ", "húp ngọt ngào", "mới bú ngọt"]
-    tien_thang = ["1m", "2m", "3m", "5m", "10m", "20m", "30m"]
-    cam_xuc_thang = ["về bờ rồi sếp", "ấm no quá anh", "uy tín quá sếp", "đẳng cấp quá idol", "ngọt lịm luôn anh", "cảm ơn sếp nhiều", "quá đã sếp ơi"]
-
-    for x in xung_ho:
-        for act in hup_hanh_dong:
-            for tt in tien_thang:
-                for cx in cam_xuc_thang:
-                    chats.add(f"{x} {act} {tt} {cx}")
-
-    # 3. Nhóm hỏi cầu / xin lệnh
-    hoi_cau = ["tay này chốt", "ván này đánh", "cầu này bệt", "ván này theo", "tay này bẻ", "ca này chốt"]
-    cua_dat = ["Banker hay Player", "Con hay Cái", "Con luôn không", "Cái luôn không", "Banker được chưa", "Player được chưa"]
-    duoi_hoi = ["hả sếp ơi", "được không anh", "uy tín không sếp", "nhé đại ca", "được chưa idol", "thế sếp ơi"]
-
-    for x in xung_ho:
-        for hc in hoi_cau:
-            for cd in cua_dat:
-                for dh in duoi_hoi:
-                    chats.add(f"{x} {hc} {cd} {dh}")
-
-    # 4. Nhóm hỏi live / kéo ca
-    hoi_live = ["lên live chưa", "mấy giờ kéo ca", "hóng ca kéo quá", "chờ sếp lên sóng", "chuẩn bị vào ca", "chưa lên live hả"]
-    trang_thai_live = ["em hóng từ sáng", "anh em đợi lâu", "cho em theo với", "kéo em về bờ", "cứu em ca này", "chờ mãi thôi anh"]
-
-    for x in xung_ho:
-        for hl in hoi_live:
-            for ttl in trang_thai_live:
-                chats.add(f"{x} {hl} {ttl}")
-
-    # 5. Các câu thực tế đặc trưng bổ sung
-    base_chats = [
-        "lên live chưa sếp ơi hóng quá",
-        "e lên vốn r nè a kéo thôi",
-        "cầu này cái hay con a ơi",
-        "tay này bệt Banker luôn không sếp",
-        "vừa nạp 2m sẵn sàng về bờ",
-        "sếp ơi ca này chốt Con hay Cái",
-        "mới húp 3m ấm no rồi sếp",
-        "theo sếp đúng là uy tín số 1",
-        "bẻ cầu tay này được chưa đại ca",
-        "đợi lệnh sếp từ sáng tới giờ",
-        "lại bú 5m ngọt lịm anh ơi",
-        "vốn 10m đã sẵn chờ sếp hô",
-        "ca này kéo mấy giờ thế sếp ơi",
-        "ăn trọn quả bệt 5 tay rồi",
-        "cảm ơn idol ca này ấm quá"
-    ]
-    for b in base_chats:
-        chats.add(b)
-
-    return list(chats)
-
-ALL_SENTENCES = build_10k_player_chats()
-
-# ----------------------------------------------------
-# 2. FLASK WEBAPP - GIAO DIỆN TERMINAL VIP
+# 1. FLASK WEBAPP - GIAO DIỆN TERMINAL VIP
 # ----------------------------------------------------
 app = Flask(__name__)
 
@@ -216,7 +140,6 @@ HTML_TEMPLATE = """
             word-break: break-word;
         }
 
-        /* THAY TOÀN BỘ ICON BẰNG TOOL VIP 7 MÀU */
         .log-chat {
             background: #111;
             border-left: 3px solid #00ff66;
@@ -234,6 +157,7 @@ HTML_TEMPLATE = """
             color: #000;
         }
 
+        /* KHU VỰC NHẬP LỆNH CHỐNG RELOAD TRANG */
         .inline-input-line {
             display: flex;
             align-items: center;
@@ -253,6 +177,18 @@ HTML_TEMPLATE = """
             outline: none;
             caret-color: #00ff66;
             width: 100%;
+        }
+
+        .btn-send-mini {
+            background: #00ff66;
+            color: #000;
+            border: none;
+            font-weight: bold;
+            font-size: 11px;
+            padding: 4px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            white-space: nowrap;
         }
 
         .quick-actions {
@@ -323,20 +259,21 @@ HTML_TEMPLATE = """
 
         <div class="status-bar">
             <div>STATUS: <span>ACTIVE</span></div>
-            <div>DATABASE: <span style="color:#00e5ff;">10,000+ CÂU</span></div>
+            <div>DATABASE: <span style="color:#00e5ff;">100,000+ CÂU</span></div>
         </div>
 
         <div class="terminal-window" id="terminal">
             <div id="logs-container">
-                <div class="log-line"><span class="tool-vip-rainbow">TOOL VIP:</span> <span style="color:#00e5ff;">Chào sếp! Sảnh Terminal AI Baccarat đã kích hoạt kho 10.000+ câu kéo ca không lặp. Sếp gõ chat hoặc bấm [10 CÂU O5] nhé!</span></div>
+                <div class="log-line"><span class="tool-vip-rainbow">TOOL VIP:</span> <span style="color:#00e5ff;">Chào sếp! Sảnh AI Terminal Baccarat kho 100.000+ câu đã sẵn sàng. Gõ chat hoặc ấn [10 CÂU O5] nhé!</span></div>
                 <div class="log-line" style="color:#333;">--------------------------------------------------</div>
             </div>
 
-            <form class="inline-input-line" onsubmit="handleFormSubmit(event)">
+            <!-- CHẶN CÁC SỰ KIỆN NGHẼN BÀN PHÍM VÀ RELOAD TRANG -->
+            <div class="inline-input-line">
                 <span class="admin-panel-prefix">admin panel:</span>
-                <input type="text" id="chat-input" placeholder="Gõ câu hỏi/lệnh rồi bấm Enter..." autocomplete="off">
-                <button type="submit" style="display: none;"></button>
-            </form>
+                <input type="text" id="chat-input" placeholder="Gõ tin nhắn rồi ấn Enter hoặc nút GỬI..." autocomplete="off">
+                <button type="button" class="btn-send-mini" onclick="sendChatMessage()">GỬI</button>
+            </div>
         </div>
 
         <div class="quick-actions">
@@ -351,10 +288,65 @@ HTML_TEMPLATE = """
         const Telegram = window.Telegram.WebApp;
         Telegram.expand();
 
-        const rawChat = {{ raw_chat | tojson | safe }};
         const terminal = document.getElementById('terminal');
         const logsContainer = document.getElementById('logs-container');
+        const chatInput = document.getElementById('chat-input');
         let isGenerating = false;
+        let usedSentences = new Set();
+
+        // ----------------------------------------------------
+        // THUẬT TOÁN SINH 100.000+ CÂU BACCARAT SIÊU TỰ NHIÊN
+        // ----------------------------------------------------
+        const xungHo = ["Sếp ơi", "Anh ơi", "Idol ơi", "Đại ca ơi", "Admin ơi", "Sếp lớn", "A ơi", "Chủ phòng", "Sếp VIP", "Idol Baccarat", "Anh trai", "Sếp em"];
+        const napAct = ["mới nạp", "vừa vào vốn", "đã nạp sẵn", "vừa bơm thêm", "em lên vốn", "vừa vào tiền", "mới chuyển cọc", "mới bơm vốn", "đã lên cọc", "vừa nạp xong"];
+        const tienVon = ["500k", "1m", "2m", "3m", "5m", "10m", "15m", "20m", "30m", "50m", "100m"];
+        const trangThai = ["chờ sếp hô lệnh", "chờ sếp lên live", "sẵn sàng chiến rồi", "đợi sếp phát lệnh", "chuẩn bị vào ca", "chờ kéo về bờ", "sẵn sàng cược", "hóng ca kéo quá"];
+        
+        const hupAct = ["vừa húp gọn", "mới bú đậm", "lại cộng thêm", "ăn trọn quả", "đã bú nhẹ", "húp ngọt ngào", "mới bú ngọt", "đã húp đậm", "lại bú ngọt lịm"];
+        const camXuc = ["về bờ rồi sếp", "ấm no quá anh", "uy tín quá sếp", "đẳng cấp quá idol", "ngọt lịm luôn anh", "cảm ơn sếp nhiều", "quá đã sếp ơi", "ấm cạ rồi anh", "chuẩn đét sếp ơi"];
+        
+        const hoiCau = ["tay này chốt", "ván này đánh", "cầu này bệt", "ván này theo", "tay này bẻ", "ca này chốt", "qua tay này", "quả này bệt"];
+        const cuaDat = ["Banker hay Player", "Con hay Cái", "Con luôn không", "Cái luôn không", "Banker được chưa", "Player được chưa", "Con ngọt hơn hay Cái"];
+        const duoiHoi = ["hả sếp ơi", "được không anh", "uy tín không sếp", "nhé đại ca", "được chưa idol", "thế sếp ơi", "chưa anh ơi", "ả sếp"];
+
+        function generateUniqueBaccaratSentence() {
+            let sentence = "";
+            let attempts = 0;
+
+            while (attempts < 50) {
+                const randType = Math.floor(Math.random() * 4);
+                const x = xungHo[Math.floor(Math.random() * xungHo.length)];
+
+                if (randType === 0) {
+                    sentence = `${x} ${napAct[Math.floor(Math.random() * napAct.length)]} ${tienVon[Math.floor(Math.random() * tienVon.length)]} ${trangThai[Math.floor(Math.random() * trangThai.length)]}`;
+                } else if (randType === 1) {
+                    sentence = `${x} ${hupAct[Math.floor(Math.random() * hupAct.length)]} ${tienVon[Math.floor(Math.random() * tienVon.length)]} ${camXuc[Math.floor(Math.random() * camXuc.length)]}`;
+                } else if (randType === 2) {
+                    sentence = `${x} ${hoiCau[Math.floor(Math.random() * hoiCau.length)]} ${cuaDat[Math.floor(Math.random() * cuaDat.length)]} ${duoiHoi[Math.floor(Math.random() * duoiHoi.length)]}`;
+                } else {
+                    const extra = [
+                        "lên live chưa sếp ơi hóng quá",
+                        "e lên vốn r nè a kéo thôi",
+                        "cầu này cái hay con a ơi",
+                        "tay này bệt Banker luôn không sếp",
+                        "vừa nạp 2m sẵn sàng về bờ",
+                        "sếp ơi ca này chốt Con hay Cái",
+                        "mới húp 3m ấm no rồi sếp",
+                        "theo sếp đúng là uy tín số 1",
+                        "bẻ cầu tay này được chưa đại ca",
+                        "đợi lệnh sếp từ sáng tới giờ"
+                    ];
+                    sentence = `${x} ${extra[Math.floor(Math.random() * extra.length)]}`;
+                }
+
+                if (!usedSentences.has(sentence)) {
+                    usedSentences.add(sentence);
+                    return sentence;
+                }
+                attempts++;
+            }
+            return sentence;
+        }
 
         function scrollToBottom() {
             terminal.scrollTop = terminal.scrollHeight;
@@ -397,7 +389,7 @@ HTML_TEMPLATE = """
             scrollToBottom();
         }
 
-        /* KHUNG CHAT TỰ ĐỘNG HIỂN THỊ DẠNG TOOL VIP 7 MÀU (XÓA SẠCH ICON 💬) */
+        /* KHUNG CHAT HOÀN TOÀN DÙNG TOOL VIP 7 MÀU (XÓA SẠCH ICON 💬) */
         function appendChatBox(text) {
             const div = document.createElement('div');
             div.className = 'log-chat';
@@ -412,7 +404,7 @@ HTML_TEMPLATE = """
 
             if (low.includes('sài') || low.includes('dùng') || low.includes('sử dụng') || low.includes('hướng dẫn') || low.includes('lệnh') || low.includes('help')) {
                 return "🎯 HƯỚNG DẪN SỬ DỤNG TOOL VIP:\n" +
-                       "1️⃣ Gõ [o5] hoặc bấm [10 CÂU O5]: Tool tự xuất 10 câu chat kéo ca Baccarat ngẫu nhiên từ kho 10.000 câu (mỗi câu cách 1s).\n" +
+                       "1️⃣ Gõ [o5] hoặc bấm [10 CÂU O5]: Tool tự xuất 10 câu chat Baccarat không trùng từ kho 100.000 câu (mỗi câu cách 1s).\n" +
                        "2️⃣ Gõ nội dung bất kỳ: Tool tạo thẻ Chat 1-chạm để copy cực nhanh quăng vào nhóm.\n" +
                        "3️⃣ Bấm [🧹 XÓA]: Dọn dẹp màn hình Terminal.\n" +
                        "4️⃣ Hỏi bất kỳ điều gì: TOOL VIP AI sẽ giải đáp & tư vấn soi cầu 24/7 cho sếp!";
@@ -440,19 +432,20 @@ HTML_TEMPLATE = """
             return `🤖 [TOOL VIP AI]: Em đã nhận thông tin "${input}". Dưới góc nhìn chuyên gia Baccarat/Casino thì làm gì cũng cần sự tính toán & quản lý vốn kỷ luật sếp nhé. Sếp cần tư vấn lệnh hay cách dùng tool cứ nhắn em!`;
         }
 
-        function handleFormSubmit(e) {
-            e.preventDefault();
-            sendChatMessage();
-            return false;
-        }
+        // BẮT BÀN PHÍM ENTER BẮT BUỘC KHÔNG LOAD LAI TRANG
+        chatInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                sendChatMessage();
+            }
+        });
 
         function sendChatMessage() {
-            const input = document.getElementById('chat-input');
-            const val = input.value.trim();
+            const val = chatInput.value.trim();
             if (!val) return;
 
             appendAdminMsg(val);
-            input.value = '';
+            chatInput.value = '';
 
             setTimeout(() => {
                 if (val.toLowerCase() === 'o5') {
@@ -461,10 +454,10 @@ HTML_TEMPLATE = """
                     const aiReply = getCasinoAiResponse(val);
                     appendToolVipMsg(aiReply);
                 }
-            }, 300);
+            }, 250);
         }
 
-        /* TỰ ĐỘNG TRÍCH XUẤT 10 CÂU KHÔNG TRÙNG LẶP TỪ KHO 10.000 CÂU */
+        // TẠO 10 CÂU O5 LẦN LƯỢT MỖI 1 GIÂY
         function fetch10O5WithDelay() {
             if (isGenerating) return;
 
@@ -473,14 +466,13 @@ HTML_TEMPLATE = """
             btn.disabled = true;
             btn.style.opacity = '0.5';
 
-            appendToolVipMsg('Đang lấy ngẫu nhiên 10 câu O5 từ kho 10.000 câu kéo ca...');
+            appendToolVipMsg('Đang kích hoạt gói 10 câu O5 Baccarat từ kho 100.000 câu...');
 
-            let shuffled = [...rawChat].sort(() => 0.5 - Math.random()).slice(0, 10);
             let count = 0;
-
             let timer = setInterval(() => {
-                if (count < shuffled.length) {
-                    appendChatBox(shuffled[count]);
+                if (count < 10) {
+                    const sentence = generateUniqueBaccaratSentence();
+                    appendChatBox(sentence);
                     count++;
                     btn.innerText = `⏳ ĐANG TẠO (${count}/10)...`;
                 } else {
@@ -506,14 +498,14 @@ HTML_TEMPLATE = """
 
 @app.route("/")
 def index():
-    return render_template_string(HTML_TEMPLATE, raw_chat=ALL_SENTENCES)
+    return render_template_string(HTML_TEMPLATE)
 
 def run_flask():
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
 
 # ----------------------------------------------------
-# 3. TELEGRAM BOT HANDLER
+# 2. TELEGRAM BOT HANDLER
 # ----------------------------------------------------
 TOKEN = os.environ.get("BOT_TOKEN")
 RENDER_URL = os.environ.get("RENDER_EXTERNAL_URL", "https://your-app-name.onrender.com")
@@ -524,19 +516,4 @@ bot = telebot.TeleBot(TOKEN)
 @bot.message_handler(func=lambda msg: True)
 def handle_all_messages(message):
     markup = InlineKeyboardMarkup()
-    web_app_info = WebAppInfo(url=RENDER_URL)
-    markup.add(InlineKeyboardButton("🖥️ MỞ TOOL VIP TERMINAL", web_app=web_app_info))
-
-    msg_text = (
-        "<b>[ - TOOL VIP CASINO TERMINAL - ]</b>\n"
-        "<code>═════════════════════════════════════</code>\n"
-        "<code>Bấm nút bên dưới để mở Sảnh Chat Terminal</code>\n"
-        "<code>Kho 10.000+ câu chat Baccarat ngẫu nhiên!</code>\n"
-        "<code>═════════════════════════════════════</code>"
-    )
-    bot.reply_to(message, msg_text, parse_mode="HTML", reply_markup=markup)
-
-if __name__ == "__main__":
-    threading.Thread(target=run_flask, daemon=True).start()
-    print(f"Sảnh Terminal TOOL VIP đã nạp thành công {len(ALL_SENTENCES)} câu chat...")
-    bot.infinity
+    w
