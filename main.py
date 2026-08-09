@@ -14,16 +14,16 @@ HTML_TEMPLATE = """
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PHUC TERMINAL LOBBY</title>
+    <title>CYBER HACKER BACCARAT TERMINAL</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         html, body {
-            background-color: #0c0d0e;
+            background-color: #030708;
             color: #00ff66;
-            font-family: 'Consolas', 'Courier New', monospace;
+            font-family: 'Consolas', 'Courier New', 'Monaco', monospace;
             margin: 0;
-            padding: 8px;
+            padding: 6px;
             height: 100vh;
             width: 100vw;
             overflow: hidden;
@@ -36,96 +36,98 @@ HTML_TEMPLATE = """
             width: 100%;
         }
 
-        .header {
+        .terminal-header {
+            background: #090d10;
+            border: 1px solid #1e2d3b;
+            padding: 6px 10px;
+            border-radius: 4px 4px 0 0;
             font-size: 10px;
-            white-space: pre;
             color: #00e5ff;
-            text-align: center;
-            line-height: 1.1;
-            margin-bottom: 6px;
-            user-select: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             font-weight: bold;
+            flex-shrink: 0;
         }
 
+        .header-dots {
+            display: flex;
+            gap: 5px;
+        }
+        .dot { width: 8px; height: 8px; border-radius: 50%; }
+        .dot-red { background: #ff5f56; }
+        .dot-yellow { background: #ffbd2e; }
+        .dot-green { background: #27c93f; }
+
         .status-bar {
-            background: #141619;
-            border: 1px solid #22252a;
-            padding: 6px 10px;
-            border-radius: 4px;
-            font-size: 11px;
-            color: #888;
-            margin-bottom: 6px;
+            background: #050a0e;
+            border-left: 1px solid #1e2d3b;
+            border-right: 1px solid #1e2d3b;
+            padding: 4px 10px;
+            font-size: 10px;
+            color: #61afef;
             display: flex;
             justify-content: space-between;
             flex-shrink: 0;
         }
-        .status-bar span { color: #00ff66; font-weight: bold; }
 
-        /* KHUNG HIỂN THỊ LOG (CÓ THỂ CUỘN) */
+        /* VÙNG KHUNG HACKER TERMINAL RUN CODE */
         .terminal-window {
             flex: 1;
-            background: #050505;
-            border: 1px solid #00ff66;
-            border-radius: 4px;
-            padding: 10px;
+            background: #020405;
+            border: 1px solid #1e2d3b;
+            padding: 8px;
             overflow-y: auto;
-            font-size: 12px;
-            line-height: 1.5;
-            margin-bottom: 8px;
-            box-shadow: inset 0 0 10px rgba(0, 255, 102, 0.1);
+            font-size: 11px;
+            line-height: 1.45;
+            box-shadow: inset 0 0 15px rgba(0, 243, 255, 0.05);
+            margin-bottom: 6px;
         }
 
+        /* MÀU CÚ PHÁP LẬP TRÌNH (SYNTAX HIGHLIGHTING) */
+        .c-kw { color: #c678dd; font-weight: bold; } /* Keywords: void, if, return */
+        .c-fn { color: #61afef; } /* Functions: analyze(), connect() */
+        .c-var { color: #e06c75; } /* Variables */
+        .c-num { color: #d19a66; } /* Numbers & Hex */
+        .c-str { color: #98c379; } /* Strings */
+        .c-cm { color: #5c6370; italic; } /* Comments */
+        .c-tag { color: #e5c07b; } /* Status tags */
+
         .log-line {
-            margin-bottom: 6px;
+            margin-bottom: 4px;
             word-break: break-word;
         }
 
-        /* TOOL VIP 7 MÀU CHUYỂN ĐỘNG */
-        .tool-vip-rainbow {
-            background: linear-gradient(90deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #8b00ff, #ff0000);
-            background-size: 200% auto;
-            color: transparent;
-            -webkit-background-clip: text;
-            background-clip: text;
-            animation: rainbow 1.5s linear infinite;
-            font-weight: bold;
-            display: inline-block;
-        }
-
-        @keyframes rainbow {
-            0% { background-position: 0% center; }
-            100% { background-position: 200% center; }
-        }
-
         .log-chat {
-            background: #111;
-            border-left: 3px solid #00ff66;
+            background: #091218;
+            border: 1px solid #00f3ff;
+            border-left: 4px solid #00ff66;
             padding: 8px;
             margin: 6px 0;
-            color: #fff;
+            color: #ffffff;
             border-radius: 3px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            box-shadow: 0 0 8px rgba(0, 255, 102, 0.15);
         }
-        .log-chat:active { background: #222; }
 
-        /* KHU VỰC NHẬP DÀNH RIÊNG CHO ĐIỆN THOẠI (TÁCH BIỆT NỔI BẬT) */
+        /* TÁCH BIỆT KHU VỰC NHẬP DÀNH CHO ĐIỆN THOẠI */
         .input-box-wrapper {
             display: flex;
             align-items: center;
-            background: #141619;
+            background: #090d10;
             border: 1px solid #00ff66;
             border-radius: 4px;
-            padding: 4px 8px;
-            margin-bottom: 8px;
+            padding: 2px 8px;
+            margin-bottom: 6px;
             flex-shrink: 0;
         }
 
         .admin-prefix {
             color: #00ff66;
             font-weight: bold;
-            font-size: 12px;
+            font-size: 11px;
             margin-right: 6px;
             white-space: nowrap;
         }
@@ -134,9 +136,9 @@ HTML_TEMPLATE = """
             flex: 1;
             background: transparent;
             border: none;
-            color: #ffffff;
+            color: #61afef;
             font-family: inherit;
-            font-size: 13px;
+            font-size: 12px;
             outline: none;
             padding: 8px 0;
             width: 100%;
@@ -147,37 +149,35 @@ HTML_TEMPLATE = """
             color: #000;
             border: none;
             font-weight: bold;
-            font-size: 12px;
-            padding: 8px 14px;
+            font-size: 11px;
+            padding: 6px 12px;
             border-radius: 3px;
             cursor: pointer;
             margin-left: 6px;
             white-space: nowrap;
         }
-        .btn-send:active { background: #00cc52; }
 
-        /* NÚT BẤM THAO TÁC NHANH */
         .quick-actions {
             display: flex;
-            gap: 8px;
+            gap: 6px;
             flex-shrink: 0;
         }
+
         .btn-action {
             flex: 1;
-            background: #181a1f;
-            color: #00e5ff;
-            border: 1px solid #00e5ff;
-            padding: 12px 0;
+            background: #0d161f;
+            color: #00f3ff;
+            border: 1px solid #00f3ff;
+            padding: 10px 0;
             font-family: inherit;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: bold;
             cursor: pointer;
             border-radius: 4px;
             text-align: center;
         }
-        .btn-action:active { background: #00e5ff; color: #000; }
-        .btn-danger { border-color: #ff5555; color: #ff5555; flex: 0.4; }
-        .btn-danger:active { background: #ff5555; color: #fff; }
+        .btn-action:active { background: #00f3ff; color: #000; }
+        .btn-danger { border-color: #ff5555; color: #ff5555; flex: 0.35; }
 
         .toast {
             position: fixed;
@@ -198,40 +198,42 @@ HTML_TEMPLATE = """
 <body>
 
     <div class="app-wrapper">
-        <div class="header">
- ___  _  _ _  _ ____ 
-|  _]| || | || |  __|
-| |  | || | || | |__ 
-|_|  |_||_|____|____|
+        <div class="terminal-header">
+            <div class="header-dots">
+                <div class="dot dot-red"></div>
+                <div class="dot dot-yellow"></div>
+                <div class="dot dot-green"></div>
+            </div>
+            <div>CYBER_TERMINAL_V8.4.exe</div>
+            <div style="color:#00ff66;">[ONLINE]</div>
         </div>
 
         <div class="status-bar">
-            <div>STATUS: <span>ACTIVE</span></div>
-            <div>DATABASE: <span style="color:#00e5ff;">100,000+ CÂU</span></div>
+            <div>CORE: <span style="color:#00ff66;">QUANTUM_AI</span></div>
+            <div>DATABASE: <span style="color:#00f3ff;">100,000+ LOGS</span></div>
         </div>
 
-        <!-- VÙNG HIỂN THỊ LOG CHAT -->
         <div class="terminal-window" id="terminal">
             <div id="logs-container">
-                <div class="log-line"><span class="tool-vip-rainbow">TOOL VIP:</span> <span style="color:#00e5ff;">Chào sếp! Ô chat bên dưới đã sẵn sàng. Gõ lệnh hoặc bấm nút [10 CÂU O5] nhé!</span></div>
+                <div class="log-line"><span class="c-cm">// CYBER TERMINAL ENGINE INITIALIZED...</span></div>
+                <div class="log-line"><span class="c-kw">void</span> <span class="c-fn">main</span>() { <span class="c-var">status</span> = <span class="c-str">"SYSTEM_READY"</span>; }</div>
                 <div class="log-line" style="color:#333;">--------------------------------------------------</div>
             </div>
         </div>
 
-        <!-- VÙNG NHẬP DÀNH RIÊNG - BẤM LÀ NẨY BÀN PHÍM -->
         <div class="input-box-wrapper">
-            <span class="admin-prefix">admin:~$</span>
-            <input type="text" id="chat-input" placeholder="Gõ câu chat/lệnh tại đây..." autocomplete="off">
-            <button class="btn-send" id="btn-submit-chat">GỬI</button>
+            <span class="admin-prefix">root@hacker:~$</span>
+            <input type="text" id="chat-input" placeholder="Gõ lệnh hoặc câu chat tại đây..." autocomplete="off">
+            <button class="btn-send" id="btn-submit-chat">RUN</button>
         </div>
 
         <div class="quick-actions">
-            <button type="button" class="btn-action" id="btn-o5">10 CÂU O5</button>
-            <button type="button" class="btn-action btn-danger" id="btn-clear">🧹 XÓA</button>
+            <button type="button" class="btn-action" id="btn-o5">⚡ EXECUTE 10 O5</button>
+            <button type="button" class="btn-action btn-danger" id="btn-clear">CLEAR</button>
         </div>
     </div>
 
-    <div class="toast" id="toast">ĐÃ COPY!</div>
+    <div class="toast" id="toast">COPIED TO CLIPBOARD!</div>
 
     <script>
         const Telegram = window.Telegram.WebApp;
@@ -246,6 +248,18 @@ HTML_TEMPLATE = """
 
         let isGenerating = false;
         let usedSentences = new Set();
+
+        // KHO MẪU CODE HACKER THỰC TẾ (KHÔNG CHỮ VỚ VẨN)
+        const hackerCodeTemplates = [
+            '<span class="c-kw">std::vector</span>&lt;<span class="c-kw">string</span>&gt; <span class="c-var">buffer</span> = <span class="c-fn">allocate_memory</span>(<span class="c-num">0x7FFF9D</span>);',
+            '<span class="c-kw">if</span> (<span class="c-fn">wss_connect</span>(<span class="c-str">"wss://casino-live.api/v3/stream"</span>) == <span class="c-num">200</span>) {',
+            '    <span class="c-fn">bypass_security_token</span>(<span class="c-str">"JWT_EXPLOIT_PAYLOAD"</span>);',
+            '}',
+            '<span class="c-kw">auto</span> <span class="c-var">pattern</span> = <span class="c-fn">analyze_shoe_algorithm</span>(<span class="c-str">"BACCARAT_V8"</span>, <span class="c-num">8492</span>);',
+            '<span class="c-cm">// Decrypting hash seed e3b0c44298fc1c149afbf4c8996fb92427ae41e4...</span>',
+            '<span class="c-kw">void</span> <span class="c-fn">inject_seed_payload</span>(<span class="c-kw">int</span> <span class="c-var">thread_id</span>, <span class="c-kw">char</span>* <span class="c-var">packet</span>);',
+            '<span class="c-tag">[SOCKET_BUFFER]</span> <span class="c-fn">Parsing_JSON_Response</span>() -&gt; <span class="c-str">"SUCCESS_200_OK"</span>;'
+        ];
 
         const xungHo = ["Sếp ơi", "Anh ơi", "Idol ơi", "Đại ca ơi", "Admin ơi", "Sếp lớn", "A ơi", "Chủ phòng", "Sếp VIP", "Idol Baccarat"];
         const napAct = ["mới nạp", "vừa vào vốn", "đã nạp sẵn", "vừa bơm thêm", "em lên vốn", "vừa vào tiền", "mới chuyển cọc"];
@@ -300,18 +314,10 @@ HTML_TEMPLATE = """
             return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         }
 
-        function appendAdminMsg(text) {
+        function appendHackerCodeLine(codeHtml) {
             const div = document.createElement('div');
             div.className = 'log-line';
-            div.innerHTML = `<span style="color:#00ff66; font-weight:bold;">admin:~$</span> <span style="color:#ffffff;">${escapeHtml(text)}</span>`;
-            logsContainer.appendChild(div);
-            scrollToBottom();
-        }
-
-        function appendToolVipMsg(text) {
-            const div = document.createElement('div');
-            div.className = 'log-line';
-            div.innerHTML = `<span class="tool-vip-rainbow">TOOL VIP:</span> <span style="color:#00e5ff;">${escapeHtml(text)}</span>`;
+            div.innerHTML = `<span style="color:#5c6370;">[EXEC]</span> ${codeHtml}`;
             logsContainer.appendChild(div);
             scrollToBottom();
         }
@@ -319,7 +325,7 @@ HTML_TEMPLATE = """
         function appendChatBox(text) {
             const div = document.createElement('div');
             div.className = 'log-chat';
-            div.innerHTML = `<div><span class="tool-vip-rainbow">TOOL VIP:</span> <span style="color:#ffffff;">${escapeHtml(text)}</span></div> <span style="opacity:0.6; font-size:10px; color:#00ff66;">📋 COPY</span>`;
+            div.innerHTML = `<div><span style="color:#00f3ff; font-weight:bold;">[PAYLOAD_OUT]:</span> <span style="color:#ffffff;">${escapeHtml(text)}</span></div> <span style="font-size:10px; color:#00ff66; font-weight:bold;">📋 COPY</span>`;
             div.onclick = () => copyToClipboard(text);
             logsContainer.appendChild(div);
             scrollToBottom();
@@ -329,19 +335,28 @@ HTML_TEMPLATE = """
             const val = chatInput.value.trim();
             if (!val) return;
 
-            appendAdminMsg(val);
+            const userDiv = document.createElement('div');
+            userDiv.className = 'log-line';
+            userDiv.innerHTML = `<span style="color:#00ff66; font-weight:bold;">root@hacker:~$</span> <span style="color:#ffffff;">${escapeHtml(val)}</span>`;
+            logsContainer.appendChild(userDiv);
             chatInput.value = '';
+            scrollToBottom();
 
+            // CHẠY HIỆU ỨNG CODE CHUẨN
             setTimeout(() => {
-                if (val.toLowerCase() === 'o5') {
-                    fetch10O5();
-                } else {
-                    appendToolVipMsg(`Đã nhận lệnh "${val}". Sếp bấm nút [10 CÂU O5] để xuất câu kéo ca nhé!`);
-                }
-            }, 200);
+                const randomCode = hackerCodeTemplates[Math.floor(Math.random() * hackerCodeTemplates.length)];
+                appendHackerCodeLine(randomCode);
+                
+                setTimeout(() => {
+                    if (val.toLowerCase() === 'o5') {
+                        execute10O5();
+                    } else {
+                        appendHackerCodeLine(`<span class="c-str">"Command '${escapeHtml(val)}' executed successfully."</span>`);
+                    }
+                }, 200);
+            }, 150);
         }
 
-        // BẮT SỰ KIỆN NÚT GỬI VÀ PHÍM ENTER
         btnSubmit.addEventListener('click', processSend);
         chatInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
@@ -350,38 +365,44 @@ HTML_TEMPLATE = """
             }
         });
 
-        // XUẤT 10 CÂU O5 KHI BẤM NÚT
-        function fetch10O5() {
+        // HÀM TẠO 10 CÂU CÓ HIỆU ỨNG CHẠY CODE LẦN LƯỢT
+        function execute10O5() {
             if (isGenerating) return;
             isGenerating = true;
             btnO5.disabled = true;
             btnO5.style.opacity = '0.5';
 
-            appendToolVipMsg('Đang tự động xuất 10 câu O5 không trùng...');
+            appendHackerCodeLine('<span class="c-kw">void</span> <span class="c-fn">start_batch_injection</span>() { <span class="c-var">target</span> = <span class="c-str">"O5_BACCARAT"</span>; }');
 
             let count = 0;
             let timer = setInterval(() => {
                 if (count < 10) {
+                    // Chạy 1 dòng code hệ thống ngẫu nhiên trước
+                    const codeSnippet = hackerCodeTemplates[Math.floor(Math.random() * hackerCodeTemplates.length)];
+                    appendHackerCodeLine(codeSnippet);
+
+                    // Xuất câu Baccarat chuẩn
                     const sentence = generateUniqueBaccaratSentence();
                     appendChatBox(sentence);
+                    
                     count++;
-                    btnO5.innerText = `⏳ ĐANG TẠO (${count}/10)...`;
+                    btnO5.innerText = `⏳ RUNNING (${count}/10)...`;
                 } else {
                     clearInterval(timer);
                     isGenerating = false;
                     btnO5.disabled = false;
                     btnO5.style.opacity = '1';
-                    btnO5.innerText = '10 CÂU O5';
-                    appendToolVipMsg('Đã hoàn tất xuất 10 câu O5!');
+                    btnO5.innerText = '⚡ EXECUTE 10 O5';
+                    appendHackerCodeLine('<span class="c-cm">// BATCH INJECTION COMPLETED SUCCESSFULLY.</span>');
                 }
-            }, 800);
+            }, 600);
         }
 
-        btnO5.addEventListener('click', fetch10O5);
+        btnO5.addEventListener('click', execute10O5);
 
         btnClear.addEventListener('click', function() {
             if (isGenerating) return;
-            logsContainer.innerHTML = '<div class="log-line"><span class="tool-vip-rainbow">TOOL VIP:</span> <span style="color:#00e5ff;">Màn hình đã được dọn sạch!</span></div>';
+            logsContainer.innerHTML = '<div class="log-line"><span class="c-cm">// TERMINAL CLEARED BY ROOT USER.</span></div>';
             scrollToBottom();
         });
     </script>
@@ -407,13 +428,13 @@ bot = telebot.TeleBot(TOKEN)
 def handle_all_messages(message):
     markup = InlineKeyboardMarkup()
     web_app_info = WebAppInfo(url=RENDER_URL)
-    markup.add(InlineKeyboardButton("🖥️ MỞ TOOL VIP TERMINAL", web_app=web_app_info))
+    markup.add(InlineKeyboardButton("💻 OPEN CYBER TERMINAL", web_app=web_app_info))
 
     msg_text = (
-        "<b>[ - TOOL VIP CASINO TERMINAL - ]</b>\n"
+        "<b>[ - CYBER TERMINAL BACCARAT ENGINE - ]</b>\n"
         "<code>═════════════════════════════════════</code>\n"
-        "<code>Bấm nút bên dưới để mở Sảnh Chat Terminal</code>\n"
-        "<code>Tích hợp kho 100.000+ câu Baccarat không lặp!</code>\n"
+        "<code>Hệ thống Hacker Code Stream 100.000+ Logs</code>\n"
+        "<code>Bấm nút bên dưới để khởi chạy Sảnh Terminal!</code>\n"
         "<code>═════════════════════════════════════</code>"
     )
     bot.reply_to(message, msg_text, parse_mode="HTML", reply_markup=markup)
