@@ -79,7 +79,7 @@ HTML_TEMPLATE = """
             width: 100%;
         }
 
-        /* NÚT CHỨC NĂNG CỦA MÁY TÍNH (ẢN Ở ĐT) */
+        /* NÚT CHỨC NĂNG CỦA MÁY TÍNH (ẨN Ở ĐT) */
         .pc-dots {
             display: none;
         }
@@ -147,7 +147,13 @@ HTML_TEMPLATE = """
             font-size: 12px;
             line-height: 1.5;
             box-shadow: inset 0 0 10px rgba(0, 255, 102, 0.1);
-            cursor: pointer;
+            cursor: text;
+            display: flex;
+            flex-direction: column;
+        }
+        #logs-container {
+            display: flex;
+            flex-direction: column;
         }
         .log-line {
             margin-bottom: 4px;
@@ -173,40 +179,28 @@ HTML_TEMPLATE = """
             color: #000;
         }
 
-        /* KHUNG NHẬP LỆNH CHÁT THỦ CÔNG */
-        .input-box {
+        /* DÒNG CON TRỎ CHAT TRỰC TIẾP TRONG TERMINAL */
+        .inline-input-line {
             display: flex;
+            align-items: center;
             gap: 6px;
-            margin-top: 8px;
-            background: #141619;
-            padding: 6px;
-            border: 1px solid #333;
-            border-radius: 4px;
+            margin-top: 6px;
+            padding-bottom: 8px;
         }
         .prompt-symbol {
             color: #00e5ff;
             font-weight: bold;
-            line-height: 32px;
-            padding-left: 4px;
+            white-space: nowrap;
         }
-        input[type="text"] {
+        .inline-input-line input {
             flex: 1;
             background: transparent;
             border: none;
             color: #fff;
             font-family: inherit;
-            font-size: 13px;
+            font-size: 12px;
             outline: none;
-        }
-        .btn-send {
-            background: #00ff66;
-            color: #000;
-            border: none;
-            padding: 0 16px;
-            font-family: inherit;
-            font-weight: bold;
-            cursor: pointer;
-            border-radius: 3px;
+            caret-color: #00ff66;
         }
 
         /* NÚT TƯƠNG TÁC NHANH */
@@ -282,26 +276,27 @@ HTML_TEMPLATE = """
             <div>SERVER: <span>RENDER_NODE_01</span></div>
         </div>
 
-        <!-- MÀN HÌNH TERMINAL CHÁT (BẤM VÀO LÀ TỰ NHẢY VÀO KHUNG NHẬP) -->
+        <!-- MÀN HÌNH TERMINAL CHÁT (ẤN VÀO LÀ TỰ NHẢY VÀO DÒNG NHẬP LỆNH) -->
         <div class="terminal-window" id="terminal" onclick="focusInput()">
-            <div class="log-line log-sys">20:21:30 INCOMING HTTP REQUEST DETECTED ...</div>
-            <div class="log-line log-sys">20:21:33 SERVICE WAKING UP ...</div>
-            <div class="log-line log-bot">[SYSTEM] Sảnh Terminal PHUC đã sẵn sàng!</div>
-            <div class="log-line log-bot">[SYSTEM] Nhấp vào màn hình để gõ lệnh hoặc bấm nút [10 CÂU O5].</div>
-            <div class="log-line log-sys">--------------------------------------------------</div>
+            <div id="logs-container">
+                <div class="log-line log-sys">20:21:30 INCOMING HTTP REQUEST DETECTED ...</div>
+                <div class="log-line log-sys">20:21:33 SERVICE WAKING UP ...</div>
+                <div class="log-line log-bot">[SYSTEM] Sảnh Terminal PHUC đã sẵn sàng!</div>
+                <div class="log-line log-bot">[SYSTEM] Nhấp vào màn hình để gõ chat hoặc bấm nút [10 CÂU O5].</div>
+                <div class="log-line log-sys">--------------------------------------------------</div>
+            </div>
+
+            <!-- DÒNG NHẬP CHAT TRỰC TIẾP NGAY BÊN DƯỚI DÒNG TIN MỚI NHẤT -->
+            <div class="inline-input-line">
+                <span class="prompt-symbol">admin panel:</span>
+                <input type="text" id="chat-input" placeholder="Gõ tin nhắn rồi ấn Enter..." onkeydown="handleKeyPress(event)" autocomplete="off">
+            </div>
         </div>
 
-        <!-- NÚT ĐIỀU KHIỂN NHANH (ĐÃ XÓA CƯỢC CON/CÁI) -->
+        <!-- NÚT ĐIỀU KHIỂN NHANH -->
         <div class="quick-actions">
             <button class="btn-action" id="btn-o5" onclick="fetch10O5WithDelay()">💬 10 CÂU O5</button>
             <button class="btn-action btn-danger" onclick="clearTerminal()">🧹 XÓA</button>
-        </div>
-
-        <!-- KHUNG CHAT / NHẬP LỆNH -->
-        <div class="input-box">
-            <span class="prompt-symbol">root@tx68:~#</span>
-            <input type="text" id="chat-input" placeholder="Gõ tin nhắn hoặc lệnh..." onkeydown="handleKeyPress(event)">
-            <button class="btn-send" onclick="sendChatMessage()">GỬI</button>
         </div>
     </div>
 
@@ -313,10 +308,11 @@ HTML_TEMPLATE = """
 
         const rawChat = {{ raw_chat | tojson }};
         const terminal = document.getElementById('terminal');
+        const logsContainer = document.getElementById('logs-container');
         let isGenerating = false;
 
         function focusInput() {
-            // Khi ấn vào khung đen terminal, tự động focus vào input gõ
+            // Nhấp vào bất kỳ điểm nào trong Terminal là tự động focus vào ô nhập chat
             if (!window.getSelection().toString()) {
                 document.getElementById('chat-input').focus();
             }
@@ -334,7 +330,7 @@ HTML_TEMPLATE = """
         }
 
         function copyToClipboard(text, e) {
-            if (e) e.stopPropagation(); // Ngăn kích hoạt focusInput() khi bấm copy
+            if (e) e.stopPropagation();
             navigator.clipboard.writeText(text).then(() => {
                 showToast('COPIED: "' + text + '"');
             });
@@ -349,7 +345,7 @@ HTML_TEMPLATE = """
             const div = document.createElement('div');
             div.className = 'log-line ' + type;
             div.innerText = `[${getTime()}] ${text}`;
-            terminal.appendChild(div);
+            logsContainer.appendChild(div);
             scrollToBottom();
         }
 
@@ -358,7 +354,7 @@ HTML_TEMPLATE = """
             div.className = 'log-chat';
             div.innerHTML = `<span>💬 ${text}</span> <span style="opacity:0.6; font-size:10px;">📋 COPY</span>`;
             div.onclick = (e) => copyToClipboard(text, e);
-            terminal.appendChild(div);
+            logsContainer.appendChild(div);
             scrollToBottom();
         }
 
@@ -385,9 +381,9 @@ HTML_TEMPLATE = """
             }
         }
 
-        // TẠO 10 CÂU O5 CÁCH NHAU MỖI 1 GIÂY (CHỐNG SPAM)
+        // TẠO 10 CÂU O5 CÁCH NHAU MỖI 1 GIÂY
         function fetch10O5WithDelay() {
-            if (isGenerating) return; // Nếu đang chạy thì ngắt không cho spam nút
+            if (isGenerating) return;
 
             isGenerating = true;
             const btn = document.getElementById('btn-o5');
@@ -412,12 +408,13 @@ HTML_TEMPLATE = """
                     btn.innerText = '💬 10 CÂU O5';
                     appendLog('STATUS: Hoàn tất xuất 10 câu!', 'log-sys');
                 }
-            }, 1000); // Cách nhau chính xác 1000ms = 1s
+            }, 1000);
         }
 
         function clearTerminal() {
             if (isGenerating) return;
-            terminal.innerHTML = '<div class="log-line log-sys">[SYSTEM] Màn hình đã được làm sạch.</div>';
+            logsContainer.innerHTML = '<div class="log-line log-sys">[SYSTEM] Màn hình đã được làm sạch.</div>';
+            scrollToBottom();
         }
     </script>
 </body>
@@ -460,3 +457,4 @@ if __name__ == "__main__":
     threading.Thread(target=run_flask, daemon=True).start()
     print("Sảnh Terminal PHUC đang chạy...")
     bot.infinity_polling()
+    
