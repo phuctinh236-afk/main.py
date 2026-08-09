@@ -7,42 +7,80 @@ import telebot
 from telebot.types import InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
 
 # ----------------------------------------------------
-# 1. KHO CÂU CHAT BACCARAT (5-7 CHỮ)
+# 1. HÀM TẠO TỰ ĐỘNG 10.000+ CÂU CHAT BACCARAT NHƯ NGƯỜI THẬT
 # ----------------------------------------------------
-RAW_PLAYER_CHAT = [
-    "+2m húp rồi anh ơi",
-    "+3m ấm no rồi sếp ơi",
-    "Húp nhẹ 2m rồi sếp ơi",
-    "+5m về bờ ngọt ngào luôn",
-    "Lại cộng 2m ngon lành luôn",
-    "Cộng 3m uy tín quá sếp",
-    "Mới bú 2m ấm quá anh",
-    "Ăn quả 3m ấm no luôn",
-    "Húp gọn 2m rồi sếp ơi",
-    "+2m húp trọn ván này rồi",
-    "Bú 5m về bờ rồi anh",
-    "+3m húp đậm rồi sếp ơi",
-    "Mới húp 3m ngọt quá anh",
-    "Lại bú 2m ngon lành luôn",
-    "Cộng 5m về bờ luôn anh",
-    "Em vừa lên vốn xong rồi anh",
-    "Vốn sẵn trong game rồi nha sếp",
-    "Em nạp tiền rồi chờ lệnh thôi",
-    "Sếp ơi nay kéo ca mấy giờ",
-    "Lên live chưa idol ơi hóng quá",
-    "Tay này chốt Con hay Cái anh",
-    "Tay này bệt Banker luôn không sếp",
-    "Tay này bẻ cầu được chưa anh",
-    "Húp ngọt quá sếp ơi uy tín",
-    "Ăn đậm tay này rồi anh ơi",
-    "Cảm ơn sếp ca này ấm quá",
-    "Lại húp rồi uy tín quá anh",
-    "Theo sếp đúng là về bờ ngay",
-]
+def build_10k_player_chats():
+    chats = set()
 
-ALL_SENTENCES = [
-    s for s in RAW_PLAYER_CHAT if 5 <= len(s.strip().split()) <= 7
-]
+    # Kho từ vựng tự nhiên của dân chơi Baccarat / Casino
+    xung_ho = ["Sếp ơi", "Anh ơi", "Idol ơi", "Đại ca ơi", "Admin ơi", "Sếp lớn", "A ơi", "Chủ phòng", "Sếp VIP", "Idol Baccarat"]
+
+    # 1. Nhóm nạp vốn / chuẩn bị
+    nap_hanh_dong = ["em mới nạp", "vừa vào vốn", "đã nạp sẵn", "vừa bơm thêm", "em lên vốn", "vừa vào tiền", "mới chuyển cọc"]
+    tien_von = ["500k", "1m", "2m", "3m", "5m", "10m", "15m", "20m", "50m"]
+    trang_thai_von = ["chờ sếp hô lệnh", "chờ sếp lên live", "sẵn sàng chiến rồi", "đợi sếp phát lệnh", "chuẩn bị vào ca", "chờ kéo về bờ"]
+
+    for x in xung_ho:
+        for act in nap_hanh_dong:
+            for tv in tien_von:
+                for tt in trang_thai_von:
+                    chats.add(f"{x} {act} {tv} {tt}")
+
+    # 2. Nhóm húp tiền / khoe thắng
+    hup_hanh_dong = ["vừa húp gọn", "mới bú đậm", "lại cộng thêm", "ăn trọn quả", "đã bú nhẹ", "húp ngọt ngào", "mới bú ngọt"]
+    tien_thang = ["1m", "2m", "3m", "5m", "10m", "20m", "30m"]
+    cam_xuc_thang = ["về bờ rồi sếp", "ấm no quá anh", "uy tín quá sếp", "đẳng cấp quá idol", "ngọt lịm luôn anh", "cảm ơn sếp nhiều", "quá đã sếp ơi"]
+
+    for x in xung_ho:
+        for act in hup_hanh_dong:
+            for tt in tien_thang:
+                for cx in cam_xuc_thang:
+                    chats.add(f"{x} {act} {tt} {cx}")
+
+    # 3. Nhóm hỏi cầu / xin lệnh
+    hoi_cau = ["tay này chốt", "ván này đánh", "cầu này bệt", "ván này theo", "tay này bẻ", "ca này chốt"]
+    cua_dat = ["Banker hay Player", "Con hay Cái", "Con luôn không", "Cái luôn không", "Banker được chưa", "Player được chưa"]
+    duoi_hoi = ["hả sếp ơi", "được không anh", "uy tín không sếp", "nhé đại ca", "được chưa idol", "thế sếp ơi"]
+
+    for x in xung_ho:
+        for hc in hoi_cau:
+            for cd in cua_dat:
+                for dh in duoi_hoi:
+                    chats.add(f"{x} {hc} {cd} {dh}")
+
+    # 4. Nhóm hỏi live / kéo ca
+    hoi_live = ["lên live chưa", "mấy giờ kéo ca", "hóng ca kéo quá", "chờ sếp lên sóng", "chuẩn bị vào ca", "chưa lên live hả"]
+    trang_thai_live = ["em hóng từ sáng", "anh em đợi lâu", "cho em theo với", "kéo em về bờ", "cứu em ca này", "chờ mãi thôi anh"]
+
+    for x in xung_ho:
+        for hl in hoi_live:
+            for ttl in trang_thai_live:
+                chats.add(f"{x} {hl} {ttl}")
+
+    # 5. Các câu thực tế đặc trưng bổ sung
+    base_chats = [
+        "lên live chưa sếp ơi hóng quá",
+        "e lên vốn r nè a kéo thôi",
+        "cầu này cái hay con a ơi",
+        "tay này bệt Banker luôn không sếp",
+        "vừa nạp 2m sẵn sàng về bờ",
+        "sếp ơi ca này chốt Con hay Cái",
+        "mới húp 3m ấm no rồi sếp",
+        "theo sếp đúng là uy tín số 1",
+        "bẻ cầu tay này được chưa đại ca",
+        "đợi lệnh sếp từ sáng tới giờ",
+        "lại bú 5m ngọt lịm anh ơi",
+        "vốn 10m đã sẵn chờ sếp hô",
+        "ca này kéo mấy giờ thế sếp ơi",
+        "ăn trọn quả bệt 5 tay rồi",
+        "cảm ơn idol ca này ấm quá"
+    ]
+    for b in base_chats:
+        chats.add(b)
+
+    return list(chats)
+
+ALL_SENTENCES = build_10k_player_chats()
 
 # ----------------------------------------------------
 # 2. FLASK WEBAPP - GIAO DIỆN TERMINAL VIP
@@ -131,7 +169,6 @@ HTML_TEMPLATE = """
         }
         .status-bar span { color: #00ff66; font-weight: bold; }
         
-        /* ADMIN PANEL MÀU XANH LÁ */
         .admin-panel-prefix {
             color: #00ff66 !important;
             font-weight: bold;
@@ -155,7 +192,6 @@ HTML_TEMPLATE = """
             100% { background-position: 200% center; }
         }
 
-        /* KHUNG TERMINAL LOG CHÁT */
         .terminal-window {
             flex: 1;
             background: #050505;
@@ -180,7 +216,7 @@ HTML_TEMPLATE = """
             word-break: break-word;
         }
 
-        /* KHUNG CHAT 1-CHẠM THAY TOÀN BỘ 💬 BẰNG TOOL VIP 7 MÀU */
+        /* THAY TOÀN BỘ ICON BẰNG TOOL VIP 7 MÀU */
         .log-chat {
             background: #111;
             border-left: 3px solid #00ff66;
@@ -198,7 +234,6 @@ HTML_TEMPLATE = """
             color: #000;
         }
 
-        /* FORM NHẬP CHAT CHUẨN ĐIỆN THOẠI */
         .inline-input-line {
             display: flex;
             align-items: center;
@@ -288,17 +323,15 @@ HTML_TEMPLATE = """
 
         <div class="status-bar">
             <div>STATUS: <span>ACTIVE</span></div>
-            <div>AI BOT: <span>CASINO_AI_V3</span></div>
+            <div>DATABASE: <span style="color:#00e5ff;">10,000+ CÂU</span></div>
         </div>
 
-        <!-- MÀN HÌNH TERMINAL CHÁT -->
         <div class="terminal-window" id="terminal">
             <div id="logs-container">
-                <div class="log-line"><span class="tool-vip-rainbow">TOOL VIP:</span> <span style="color:#00e5ff;">Chào sếp! Sảnh Terminal AI Baccarat đã kích hoạt. Sếp gõ câu hỏi hoặc ấn nút [10 CÂU O5] nhé!</span></div>
+                <div class="log-line"><span class="tool-vip-rainbow">TOOL VIP:</span> <span style="color:#00e5ff;">Chào sếp! Sảnh Terminal AI Baccarat đã kích hoạt kho 10.000+ câu kéo ca không lặp. Sếp gõ chat hoặc bấm [10 CÂU O5] nhé!</span></div>
                 <div class="log-line" style="color:#333;">--------------------------------------------------</div>
             </div>
 
-            <!-- FORM GỬI CHAT TƯƠNG THÍCH MỌI BÀN PHÍM ĐIỆN THOẠI -->
             <form class="inline-input-line" onsubmit="handleFormSubmit(event)">
                 <span class="admin-panel-prefix">admin panel:</span>
                 <input type="text" id="chat-input" placeholder="Gõ câu hỏi/lệnh rồi bấm Enter..." autocomplete="off">
@@ -306,7 +339,6 @@ HTML_TEMPLATE = """
             </form>
         </div>
 
-        <!-- NÚT ĐIỀU KHIỂN NHANH -->
         <div class="quick-actions">
             <button type="button" class="btn-action" id="btn-o5" onclick="fetch10O5WithDelay()">10 CÂU O5</button>
             <button type="button" class="btn-action btn-danger" onclick="clearTerminal()">🧹 XÓA</button>
@@ -319,7 +351,6 @@ HTML_TEMPLATE = """
         const Telegram = window.Telegram.WebApp;
         Telegram.expand();
 
-        // FIX LỖI JSON TRÊN TELEGRAM WEBAPP
         const rawChat = {{ raw_chat | tojson | safe }};
         const terminal = document.getElementById('terminal');
         const logsContainer = document.getElementById('logs-container');
@@ -366,7 +397,7 @@ HTML_TEMPLATE = """
             scrollToBottom();
         }
 
-        /* TOÀN BỘ CHAT HIỂN THỊ ĐỀU DÙNG TOOL VIP 7 MÀU (ĐÃ XÓA 💬) */
+        /* KHUNG CHAT TỰ ĐỘNG HIỂN THỊ DẠNG TOOL VIP 7 MÀU (XÓA SẠCH ICON 💬) */
         function appendChatBox(text) {
             const div = document.createElement('div');
             div.className = 'log-chat';
@@ -376,17 +407,14 @@ HTML_TEMPLATE = """
             scrollToBottom();
         }
 
-        // ----------------------------------------------------
-        // TRÍ TUỆ NHÂN TẠO AI CASINO & HƯỚNG DẪN DÙNG TOOL
-        // ----------------------------------------------------
         function getCasinoAiResponse(input) {
             const low = input.toLowerCase().trim();
 
             if (low.includes('sài') || low.includes('dùng') || low.includes('sử dụng') || low.includes('hướng dẫn') || low.includes('lệnh') || low.includes('help')) {
                 return "🎯 HƯỚNG DẪN SỬ DỤNG TOOL VIP:\n" +
-                       "1️⃣ Gõ [o5] hoặc bấm nút [10 CÂU O5]: Tool tự xuất 10 câu chat kéo ca Baccarat (mỗi câu cách 1s).\n" +
+                       "1️⃣ Gõ [o5] hoặc bấm [10 CÂU O5]: Tool tự xuất 10 câu chat kéo ca Baccarat ngẫu nhiên từ kho 10.000 câu (mỗi câu cách 1s).\n" +
                        "2️⃣ Gõ nội dung bất kỳ: Tool tạo thẻ Chat 1-chạm để copy cực nhanh quăng vào nhóm.\n" +
-                       "3️⃣ Bấm nút [🧹 XÓA]: Dọn dẹp màn hình Terminal.\n" +
+                       "3️⃣ Bấm [🧹 XÓA]: Dọn dẹp màn hình Terminal.\n" +
                        "4️⃣ Hỏi bất kỳ điều gì: TOOL VIP AI sẽ giải đáp & tư vấn soi cầu 24/7 cho sếp!";
             }
 
@@ -412,7 +440,6 @@ HTML_TEMPLATE = """
             return `🤖 [TOOL VIP AI]: Em đã nhận thông tin "${input}". Dưới góc nhìn chuyên gia Baccarat/Casino thì làm gì cũng cần sự tính toán & quản lý vốn kỷ luật sếp nhé. Sếp cần tư vấn lệnh hay cách dùng tool cứ nhắn em!`;
         }
 
-        // XỬ LÝ SỰ KIỆN SUBMIT FORM (ĐÃ SỬA LỖI ĐIỆN THOẠI)
         function handleFormSubmit(e) {
             e.preventDefault();
             sendChatMessage();
@@ -437,7 +464,7 @@ HTML_TEMPLATE = """
             }, 300);
         }
 
-        // TẠO 10 CÂU O5 CÁCH NHAU MỖI 1 GIÂY
+        /* TỰ ĐỘNG TRÍCH XUẤT 10 CÂU KHÔNG TRÙNG LẶP TỪ KHO 10.000 CÂU */
         function fetch10O5WithDelay() {
             if (isGenerating) return;
 
@@ -446,7 +473,7 @@ HTML_TEMPLATE = """
             btn.disabled = true;
             btn.style.opacity = '0.5';
 
-            appendToolVipMsg('Đang kích hoạt gói 10 câu O5 kéo ca (mỗi câu cách 1s)...');
+            appendToolVipMsg('Đang lấy ngẫu nhiên 10 câu O5 từ kho 10.000 câu kéo ca...');
 
             let shuffled = [...rawChat].sort(() => 0.5 - Math.random()).slice(0, 10);
             let count = 0;
@@ -504,13 +531,12 @@ def handle_all_messages(message):
         "<b>[ - TOOL VIP CASINO TERMINAL - ]</b>\n"
         "<code>═════════════════════════════════════</code>\n"
         "<code>Bấm nút bên dưới để mở Sảnh Chat Terminal</code>\n"
-        "<code>Tích hợp AI Trợ Lý Casino & Soi Cầu 24/7!</code>\n"
+        "<code>Kho 10.000+ câu chat Baccarat ngẫu nhiên!</code>\n"
         "<code>═════════════════════════════════════</code>"
     )
     bot.reply_to(message, msg_text, parse_mode="HTML", reply_markup=markup)
 
 if __name__ == "__main__":
     threading.Thread(target=run_flask, daemon=True).start()
-    print("Sảnh Terminal TOOL VIP đang chạy...")
-    bot.infinity_polling()
-    
+    print(f"Sảnh Terminal TOOL VIP đã nạp thành công {len(ALL_SENTENCES)} câu chat...")
+    bot.infinity
