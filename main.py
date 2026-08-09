@@ -1,3 +1,4 @@
+import html
 import os
 import random
 import threading
@@ -21,10 +22,10 @@ def run_flask():
 
 
 # ----------------------------------------------------
-# 2. KHO 160+ CÂU CHAT NGƯỜI CHƠI THỰC TẾ (5-7 CHỮ)
+# 2. KHO CÂU CHAT NGƯỜI CHƠI THỰC TẾ (5-7 CHỮ)
 # ----------------------------------------------------
 RAW_PLAYER_CHAT = [
-    # --- Nhóm 1: Báo CỘNG TIỀN / Thắng Lớn (+500k, +1m, +2m, +3m, +5m, +10m...) ---
+    # --- Nhóm 1: Báo CỘNG TIỀN / Thắng Lớn ---
     "+2m húp rồi anh ơi",
     "+3m ấm no rồi sếp ơi",
     "Húp nhẹ 2m rồi sếp ơi",
@@ -96,7 +97,7 @@ RAW_PLAYER_CHAT = [
     "Em chuẩn bị xong tiền rồi",
     "Nay vào vốn to theo sếp",
     "Sếp ơi em lên tiền rồi",
-    # --- Nhóm 3: Hỏi Kèo / Xin Góc Đánh Con - Cái - Bệt - Bẻ ---
+    # --- Nhóm 3: Hỏi Kèo / Bệt / Bẻ ---
     "Tay này chốt Con hay Cái anh",
     "Tay này bệt Banker luôn không sếp",
     "Tay này bẻ cầu được chưa anh",
@@ -132,7 +133,7 @@ RAW_PLAYER_CHAT = [
     "Quả cầu 2 2 đẹp đẽ",
     "Kèo này uy tín không sếp",
     "Nên chốt Con hay Cái anh",
-    # --- Nhóm 4: Hô Húp / Khen Sếp / Báo Về Bờ ---
+    # --- Nhóm 4: Hô Húp / Báo Về Bờ ---
     "Húp ngọt quá sếp ơi uy tín",
     "Ăn đậm tay này rồi anh ơi",
     "Cảm ơn sếp ca này ấm quá",
@@ -163,22 +164,6 @@ RAW_PLAYER_CHAT = [
     "Ca này húp đẫm rồi anh",
     "Bú thông 5 tay rồi sếp",
     "Đúng là idol kéo có khác",
-    # --- Nhóm 5: Tự Nhiên Chém Gió Trong Nhóm / Livestream ---
-    "Hôm nay anh em ăn to thế",
-    "Ai cũng về bờ hết rồi",
-    "Ca đêm nay ấm cúng quá",
-    "Sếp hô tay nào ăn tay đó",
-    "Dây đỏ kéo dài quá anh",
-    "Mong dây đỏ giữ tới sáng",
-    "Nay theo sếp bú đẫm luôn",
-    "Anh em nay xanh chín quá",
-    "Nhóm mình nay thắng to thật",
-    "Càng đánh càng mê sếp ơi",
-    "Cầu hôm nay đi quá đẹp",
-    "Nay sếp hô quá đẳng cấp",
-    "Mọi người húp đẫm chưa nào",
-    "Cảm ơn sếp vì ca này",
-    "Mai lại tiếp tục nha sếp",
 ]
 
 # Tự động lọc đảm bảo 100% câu từ 5 đến 7 chữ
@@ -202,7 +187,7 @@ def get_10_unique_sentences():
 
 
 # ----------------------------------------------------
-# 3. CẤU HÌNH VÀ XỬ LÝ LỆNH TELEGRAM BOT
+# 3. CẤU HÌNH VÀ TẠO MENU CHẠM LÀ COPY (PARSER HTML)
 # ----------------------------------------------------
 TOKEN = os.environ.get("BOT_TOKEN")
 bot = telebot.TeleBot(TOKEN)
@@ -213,13 +198,34 @@ bot = telebot.TeleBot(TOKEN)
 )
 def handle_o5(message):
     selected_10 = get_10_unique_sentences()
-    reply_text = "\n".join(selected_10)
-    bot.reply_to(message, reply_text)
+
+    # Dựng giao diện Tool / Game (Termux Style)
+    lines = []
+    lines.append("<b>[ - BACCARAT TOOL VIP - ]</b>")
+    lines.append("<code>═════════════════════════════════════</code>")
+    lines.append("<code>~{ }~ Status: Active | Mode: Auto O5</code>")
+    lines.append("<code>[NQ-TOOL] | User: VIP | Status: SUCCESS</code>")
+    lines.append("<code>─────────────────────────────────────</code>")
+
+    # Mỗi câu được bọc trong thẻ <code> giúp bấm nhẹ vào câu đó là COPY tự động
+    for idx, sentence in enumerate(selected_10, 1):
+        escaped_s = html.escape(sentence)
+        lines.append(f"[{idx:02d}] <code>{escaped_s}</code>")
+
+    lines.append("<code>─────────────────────────────────────</code>")
+    lines.append("<code>~{ }~ Dùng Tool Vui Vẻ! Gõ O5 Lấy Tiếp</code>")
+    lines.append("<code>═════════════════════════════════════</code>")
+
+    reply_text = "\n".join(lines)
+
+    try:
+        # Gửi tin nhắn chế độ HTML
+        bot.reply_to(message, reply_text, parse_mode="HTML")
+    except Exception as e:
+        bot.reply_to(message, "\n".join(selected_10))
 
 
 if __name__ == "__main__":
     threading.Thread(target=run_flask, daemon=True).start()
-    print(
-        f"Bot đã khởi tạo thành công {len(ALL_SENTENCES)} câu chốt lời Baccarat!"
-    )
+    print("Bot đã sẵn sàng với Menu Tool COPY 1-Chạm!")
     bot.infinity_polling()
